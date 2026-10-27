@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SheetJS (Lectura de TXT/CSV/Excel) -->
+    <!-- SheetJS -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -83,7 +83,7 @@
 
     <!-- Barra de Estado de Carga -->
     <div id="loadingStatus" class="hidden bg-cyan-600 text-white text-xs py-1.5 px-4 text-center font-medium animate-pulse">
-        Sincronizando datos...
+        Sincronizando base de datos...
     </div>
 
     <!-- Navbar -->
@@ -101,7 +101,7 @@
 
             <!-- Panel de Usuario y Estado -->
             <div class="flex items-center flex-wrap gap-2">
-                <!-- Botón forzar actualización -->
+                <!-- Botón forzar actualización manual -->
                 <button id="btnForceSync" title="Forzar recarga completa desde GitHub" class="text-[11px] bg-slate-800/80 hover:bg-slate-700 border border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-300 flex items-center gap-1.5 transition-colors">
                     <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-cyan-400"></i>
                     <span>Sincronizar</span>
@@ -460,6 +460,54 @@
         const pageSize = 8;
         let activeUser = null;
 
+        // MOTOR INDEXEDDB (Base de datos del navegador para almacenar los 92,000 registros sin límites)
+        const DB_NAME = 'AlbrechtEmergenciasDB';
+        const DB_VERSION = 1;
+
+        function openIndexedDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('cache')) {
+                        db.createObjectStore('cache');
+                    }
+                };
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function getIDBValue(key) {
+            try {
+                const db = await openIndexedDB();
+                return new Promise((resolve) => {
+                    const tx = db.transaction('cache', 'readonly');
+                    const store = tx.objectStore('cache');
+                    const req = store.get(key);
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => resolve(null);
+                });
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function setIDBValue(key, val) {
+            try {
+                const db = await openIndexedDB();
+                return new Promise((resolve) => {
+                    const tx = db.transaction('cache', 'readwrite');
+                    const store = tx.objectStore('cache');
+                    store.put(val, key);
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => resolve(false);
+                });
+            } catch (e) {
+                return false;
+            }
+        }
+
         function initUsers() {
             let users = JSON.parse(localStorage.getItem('essalud_users'));
             if (!users) {
@@ -485,8 +533,8 @@
             document.getElementById('btnLogout').addEventListener('click', handleLogout);
 
             // Botón forzar sincronización
-            document.getElementById('btnForceSync').addEventListener('click', () => {
-                localStorage.removeItem('albrecht_cache_version');
+            document.getElementById('btnForceSync').addEventListener('click', async () => {
+                await setIDBValue('cached_version', null);
                 fetchCentralData();
             });
 
@@ -555,14 +603,14 @@
             document.getElementById('evalPrioFilter').addEventListener('change', renderEvalTable);
         });
 
-        // DESCARGA ACELERADA CON MEMORIA LOCAL (LOCALSTORAGE) Y PARALELISMO
+        // DESCARGA ACELERADA CON INDEXEDDB
         async function fetchCentralData() {
             const loadingBar = document.getElementById('loadingStatus');
             loadingBar.classList.remove('hidden', 'bg-rose-600');
             loadingBar.classList.add('bg-cyan-600', 'animate-pulse');
 
             try {
-                // 1. Consultar fecha de última actualización en GitHub
+                // 1. Obtener fecha de la última actualización en GitHub
                 let serverDate = "Local";
                 try {
                     const commitRes = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/commits?page=1&per_page=1`);
@@ -578,23 +626,22 @@
                     console.warn(e);
                 }
 
-                // 2. Si la versión de GitHub coincide con la guardada en este equipo, carga en 0.1s
-                const cachedVersion = localStorage.getItem('albrecht_cache_version');
-                const cachedSummary = localStorage.getItem('albrecht_cached_data');
-                const cachedRaw = localStorage.getItem('albrecht_cached_raw');
+                // 2. Comprobar si ya existe en la base de datos interna del navegador
+                const cachedVersion = await getIDBValue('cached_version');
+                const cachedSummary = await getIDBValue('cached_summary');
+                const cachedRaw = await getIDBValue('cached_raw');
 
                 if (cachedVersion === serverDate && cachedSummary && cachedRaw) {
-                    loadingBar.innerText = "Cargando desde memoria ultra rápida...";
-                    currentData = JSON.parse(cachedSummary);
-                    rawRecordsData = JSON.parse(cachedRaw);
+                    currentData = cachedSummary;
+                    rawRecordsData = cachedRaw;
                     populateFilters();
                     updateDashboard();
                     loadingBar.classList.add('hidden');
-                    return;
+                    return; // Carga en milisegundos
                 }
 
-                // 3. Si hubo cambios en GitHub, descarga en paralelo los meses
-                loadingBar.innerText = "Sincronizando datos actualizados desde GitHub...";
+                // 3. Descargar en paralelo solo cuando hay actualización real
+                loadingBar.innerText = "Descargando y consolidando archivos de emergencias...";
                 currentData = [];
                 rawRecordsData = [];
                 globalSeenActos.clear();
@@ -605,7 +652,6 @@
                     'mes_09.txt', 'mes_10.txt', 'mes_11.txt', 'mes_12.txt'
                 ];
 
-                // Descarga concurrente de todos los archivos
                 const fetchPromises = monthFiles.map(async (file) => {
                     let res = await fetch(`https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/data/${file}?t=${Date.now()}`);
                     if (!res.ok) {
@@ -631,27 +677,24 @@
                 });
 
                 if (totalProcesados > 0) {
-                    // Guardar versión procesada en localStorage para acelerar futuras aperturas
-                    try {
-                        localStorage.setItem('albrecht_cache_version', serverDate);
-                        localStorage.setItem('albrecht_cached_data', JSON.stringify(currentData));
-                        localStorage.setItem('albrecht_cached_raw', JSON.stringify(rawRecordsData));
-                    } catch(e) {
-                        console.warn("Límite de memoria local alcanzado:", e);
-                    }
+                    // Guardar en IndexedDB
+                    await setIDBValue('cached_version', serverDate);
+                    await setIDBValue('cached_summary', currentData);
+                    await setIDBValue('cached_raw', rawRecordsData);
+
                     populateFilters();
                     updateDashboard();
                     loadingBar.classList.add('hidden');
                 } else {
                     loadingBar.classList.remove('bg-cyan-600', 'animate-pulse');
                     loadingBar.classList.add('bg-rose-600');
-                    loadingBar.innerText = "No se encontraron archivos en la carpeta data/. Verifique el repositorio.";
+                    loadingBar.innerText = "No se encontraron archivos en la carpeta data/.";
                 }
             } catch (err) {
                 console.error(err);
                 loadingBar.classList.remove('bg-cyan-600', 'animate-pulse');
                 loadingBar.classList.add('bg-rose-600');
-                loadingBar.innerText = "Error procesando datos: " + err.message;
+                loadingBar.innerText = "Error cargando datos: " + err.message;
             }
         }
 
