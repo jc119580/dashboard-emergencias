@@ -19,31 +19,112 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
+    <!-- Modal de Inicio de Sesión -->
+    <div id="loginModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-sm w-full p-6 text-center space-y-5">
+            <div class="w-14 h-14 bg-blue-100 text-blue-700 rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+                <i data-lucide="shield-check" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-slate-900">Control de Emergencias</h2>
+                <p class="text-xs text-slate-500 mt-1">Hospital I Albrecht - Inicie sesión con su DNI</p>
+            </div>
+            <form id="loginForm" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">DNI</label>
+                    <input type="text" id="loginDni" maxlength="8" required placeholder="Ingrese su DNI"
+                           class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Contraseña</label>
+                    <input type="password" id="loginPass" required placeholder="••••••••"
+                           class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                </div>
+                <p id="loginError" class="text-xs text-rose-600 hidden font-medium"></p>
+                <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2.5 rounded-lg text-sm transition-all shadow-md">
+                    Ingresar al Sistema
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Cambiar Contraseña -->
+    <div id="pwdModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-sm w-full p-6 space-y-4">
+            <div class="flex items-center justify-between border-b pb-3">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <i data-lucide="key" class="w-4 h-4 text-blue-600"></i> Cambiar Contraseña
+                </h3>
+                <button id="btnClosePwdModal" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <form id="changePwdForm" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Contraseña Actual</label>
+                    <input type="password" id="oldPass" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Nueva Contraseña</label>
+                    <input type="password" id="newPass" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Confirmar Nueva Contraseña</label>
+                    <input type="password" id="confirmNewPass" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                </div>
+                <p id="pwdError" class="text-[11px] text-rose-600 hidden font-medium"></p>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" id="btnCancelPwd" class="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100">Cancelar</button>
+                    <button type="submit" class="px-3 py-1.5 rounded-lg bg-blue-700 text-white font-medium hover:bg-blue-800">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Barra de Estado de Carga -->
+    <div id="loadingStatus" class="hidden bg-cyan-600 text-white text-xs py-1.5 px-4 text-center font-medium animate-pulse">
+        Descargando y consolidando base de datos de emergencias desde GitHub...
+    </div>
+
     <!-- Navbar -->
     <header class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center space-x-3">
                 <div class="p-2 bg-blue-600/30 rounded-lg backdrop-blur-sm border border-blue-400/30">
                     <i data-lucide="activity" class="w-6 h-6 text-cyan-400"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg leading-tight">Sistema de Control de Emergencias</h1>
+                    <h1 class="font-bold text-base sm:text-lg leading-tight">Sistema de Control de Emergencias</h1>
                     <p class="text-xs text-slate-300">Hospital I Albrecht | Red Asistencial La Libertad</p>
                 </div>
             </div>
 
-            <!-- Botones de Carga y Limpieza -->
-            <div class="flex items-center space-x-2">
-                <button id="btnClearData" class="hidden bg-rose-600/80 hover:bg-rose-600 text-white text-xs px-3 py-2 rounded-lg transition-all flex items-center space-x-1 shadow-md">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                    <span>Limpiar Datos</span>
-                </button>
+            <!-- Panel de Usuario y Estado -->
+            <div class="flex items-center flex-wrap gap-2">
+                <!-- Indicador de Última Actualización -->
+                <div id="updateBadge" class="text-[11px] bg-slate-800/80 border border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="calendar-clock" class="w-3.5 h-3.5 text-cyan-400"></i>
+                    <span>Última Actualización: <strong id="lblLastUpdate" class="text-cyan-300">Consultando...</strong></span>
+                </div>
 
-                <label class="cursor-pointer bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-xs sm:text-sm px-4 py-2 rounded-lg transition-all flex items-center space-x-2 shadow-md hover:shadow-cyan-500/20">
-                    <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-                    <span>Cargar TXT/Excel (1 o varios meses)</span>
-                    <input type="file" id="fileInput" accept=".txt, .csv, .xlsx, .xls" multiple class="hidden">
+                <!-- Botón Manual de Prueba Local (Solo visible para el Administrador) -->
+                <label id="btnUploadContainer" class="hidden cursor-pointer bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-xs px-3 py-1.5 rounded-lg transition-all items-center space-x-1.5 shadow-md">
+                    <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
+                    <span>Probar TXT Local</span>
+                    <input type="file" id="fileInput" accept=".txt, .csv, .xlsx, .xls" class="hidden">
                 </label>
+
+                <!-- Menú de Usuario -->
+                <div class="flex items-center space-x-1 bg-blue-950/70 border border-blue-400/30 rounded-lg px-2.5 py-1">
+                    <i data-lucide="user" class="w-4 h-4 text-cyan-300"></i>
+                    <span id="userBadge" class="text-xs font-semibold text-blue-100 mr-2">DNI</span>
+                    <button id="btnOpenChangePwd" title="Cambiar Contraseña" class="p-1 hover:text-cyan-300 text-slate-300 transition-colors">
+                        <i data-lucide="key" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <button id="btnLogout" title="Cerrar Sesión" class="p-1 hover:text-rose-400 text-slate-300 transition-colors">
+                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -59,23 +140,19 @@
                     <span>IPRESS Adscripción:</span>
                 </div>
                 
-                <!-- Búsqueda por Nombre -->
                 <div class="relative min-w-[260px]">
                     <input type="text" id="searchEstablecimiento" list="listEstablecimientos" placeholder="🔍 Escribe o busca IPRESS..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs sm:text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     <datalist id="listEstablecimientos"></datalist>
                 </div>
 
-                <!-- Selector Desplegable de IPRESS -->
                 <select id="filterEstablecimiento" class="bg-slate-50 border border-slate-300 text-slate-700 text-xs sm:text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none max-w-[220px]">
                     <option value="ALL">🏢 Todas las IPRESS</option>
                 </select>
 
-                <!-- Filtro de Tópico -->
                 <select id="filterTopico" class="bg-slate-50 border border-slate-300 text-slate-700 text-xs sm:text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     <option value="ALL">Todos los Tópicos</option>
                 </select>
 
-                <!-- Filtro de Mes -->
                 <select id="filterMes" class="bg-slate-50 border border-slate-300 text-slate-700 text-xs sm:text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     <option value="ALL">Todos los Meses</option>
                 </select>
@@ -88,7 +165,7 @@
                 </button>
                 <div class="h-4 w-px bg-slate-300"></div>
                 <span id="recordCount" class="text-xs font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
-                    Calculando...
+                    Cargando registros...
                 </span>
             </div>
         </div>
@@ -106,7 +183,7 @@
                         <i data-lucide="users" class="w-5 h-5"></i>
                     </div>
                 </div>
-                <p class="mt-2 text-[11px] text-emerald-600 font-medium">Actos médicos únicos concluidos</p>
+                <p class="mt-2 text-[11px] text-emerald-600 font-medium">Actos médicos concluidos</p>
             </div>
 
             <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
@@ -207,16 +284,9 @@
                         </tr>
                     </thead>
                     <tbody id="evalTableBody" class="divide-y divide-slate-100 font-medium">
-                        <!-- Inyección dinámica -->
+                        <tr><td colspan="6" class="text-center py-6 text-slate-400">Cargando base de datos...</td></tr>
                     </tbody>
                 </table>
-            </div>
-            <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-between items-center text-[11px] text-slate-500">
-                <span>Ordenado de mayor a menor tiempo promedio para auditar demoras.</span>
-                <span class="flex items-center gap-3">
-                    <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span> Cumple meta</span>
-                    <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span> Excede meta</span>
-                </span>
             </div>
         </div>
 
@@ -248,7 +318,7 @@
             </div>
         </div>
 
-        <!-- SECCIÓN: Diagnósticos Más Recurrentes -->
+        <!-- Diagnósticos Recurrentes -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
                 <div class="flex items-center justify-between mb-4">
@@ -256,7 +326,6 @@
                         <i data-lucide="alert-circle" class="w-4 h-4 text-rose-600"></i>
                         Top Diagnósticos Recurrentes (Código CIE-10 + Nombre)
                     </h3>
-                    <span class="text-xs text-slate-400">Casos acumulados</span>
                 </div>
                 <div class="h-72 relative">
                     <canvas id="chartDiagnosticos"></canvas>
@@ -270,48 +339,36 @@
                         Ranking de Diagnósticos
                     </h3>
                     <div class="overflow-y-auto max-h-60 pr-1">
-                        <ul id="listDiagnosticos" class="space-y-2 text-xs">
-                            <!-- Inyección dinámica -->
-                        </ul>
+                        <ul id="listDiagnosticos" class="space-y-2 text-xs"></ul>
                     </div>
                 </div>
-                <p class="text-[11px] text-slate-400 mt-4 border-t pt-2 text-right">Filtro dinámico en tiempo real</p>
             </div>
         </div>
 
         <!-- Charts Grid Row 2 -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
-                        <i data-lucide="building" class="w-4 h-4 text-cyan-600"></i>
-                        Distribución por Adscripción
-                    </h3>
-                </div>
+                <h3 class="font-bold text-slate-800 text-sm sm:text-base mb-4 flex items-center gap-2">
+                    <i data-lucide="building" class="w-4 h-4 text-cyan-600"></i> Distribución por Adscripción
+                </h3>
                 <div class="h-64 relative">
                     <canvas id="chartEstablecimientos"></canvas>
                 </div>
             </div>
 
             <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
-                        <i data-lucide="layers" class="w-4 h-4 text-emerald-600"></i>
-                        Atenciones por Tópico
-                    </h3>
-                </div>
+                <h3 class="font-bold text-slate-800 text-sm sm:text-base mb-4 flex items-center gap-2">
+                    <i data-lucide="layers" class="w-4 h-4 text-emerald-600"></i> Atenciones por Tópico
+                </h3>
                 <div class="h-64 relative">
                     <canvas id="chartTopicos"></canvas>
                 </div>
             </div>
 
             <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
-                        <i data-lucide="pie-chart" class="w-4 h-4 text-rose-600"></i>
-                        Distribución por Prioridad
-                    </h3>
-                </div>
+                <h3 class="font-bold text-slate-800 text-sm sm:text-base mb-4 flex items-center gap-2">
+                    <i data-lucide="pie-chart" class="w-4 h-4 text-rose-600"></i> Distribución por Prioridad
+                </h3>
                 <div class="h-64 relative flex items-center justify-center">
                     <canvas id="chartPrioridad"></canvas>
                 </div>
@@ -322,8 +379,8 @@
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div class="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <h3 id="tableTitle" class="font-bold text-slate-800 text-sm sm:text-base">Resumen de Atenciones</h3>
-                    <p id="tableSubtitle" class="text-xs text-slate-500">Consolidado Hospital I Albrecht por Tópico (Ene - Dic)</p>
+                    <h3 class="font-bold text-slate-800 text-sm sm:text-base">Resumen de Atenciones</h3>
+                    <p class="text-xs text-slate-500">Consolidado por Tópico (Ene - Dic)</p>
                 </div>
                 <input type="text" id="tableSearch" placeholder="Buscar tópico en esta tabla..." class="bg-slate-50 border border-slate-300 text-slate-700 text-xs rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none w-full sm:w-64">
             </div>
@@ -350,7 +407,7 @@
                         </tr>
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-slate-100">
-                        <!-- Filas inyectadas -->
+                        <tr><td colspan="15" class="text-center py-6 text-slate-400">Sin datos cargados</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -366,37 +423,80 @@
 
     </main>
 
-    <!-- Script principal -->
     <script>
-        const MONTHS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
+        // CONFIGURACIÓN DE GITHUB Y USUARIOS AUTORIZADOS
+        const GITHUB_USER = 'jc119580';
+        const GITHUB_REPO = 'dashboard-emergencias';
+        const ADMIN_DNI = '42283343';
+        const DEFAULT_USERS = [
+            '42283343', // Administrador
+            '18213999',
+            '46574828',
+            '40661036',
+            '41741857',
+            '06275632',
+            '17827846',
+            '17814977'
+        ];
 
+        const MONTHS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
         const CODE_TO_TOPIC = {
-            '01': 'MEDICINA 1',
-            '02': 'MEDICINA 1',
-            '03': 'PEDIATRIA 1',
-            '04': 'GINECOLOGIA',
-            '06': 'TOP. CIRUGIA',
-            '07': 'SHOCK TRAUMA',
-            '11': 'SALA OBSERVACION ADULTOS',
-            'S2': 'MEDICINA 2'
+            '01': 'MEDICINA 1', '02': 'MEDICINA 1', '03': 'PEDIATRIA 1',
+            '04': 'GINECOLOGIA', '06': 'TOP. CIRUGIA', '07': 'SHOCK TRAUMA',
+            '11': 'SALA OBSERVACION ADULTOS', 'S2': 'MEDICINA 2'
         };
 
         let currentData = [];
         let rawRecordsData = [];
         let globalSeenActos = new Set();
-        let isInitialState = true;
         let evalViewMode = 'TOPICO';
         let chartTrend, chartPrioridad, chartEstablecimientos, chartTopicos, chartMedicos, chartDiagnosticos;
         let currentPage = 1;
         const pageSize = 8;
+        let activeUser = null;
+
+        function initUsers() {
+            let users = JSON.parse(localStorage.getItem('essalud_users'));
+            if (!users) {
+                users = {};
+                DEFAULT_USERS.forEach(dni => { users[dni] = dni; });
+                localStorage.setItem('essalud_users', JSON.stringify(users));
+            } else {
+                DEFAULT_USERS.forEach(dni => {
+                    if (!users[dni]) users[dni] = dni;
+                });
+                localStorage.setItem('essalud_users', JSON.stringify(users));
+            }
+        }
 
         document.addEventListener("DOMContentLoaded", () => {
+            initUsers();
             lucide.createIcons();
             initCharts();
+            checkSession();
 
-            document.getElementById('fileInput').addEventListener('change', handleFileUpload);
-            document.getElementById('btnClearData').addEventListener('click', clearAllData);
+            // Eventos Login / Sesión
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('btnLogout').addEventListener('click', handleLogout);
+
+            // Modal Contraseña
+            document.getElementById('btnOpenChangePwd').addEventListener('click', () => {
+                document.getElementById('pwdError').classList.add('hidden');
+                document.getElementById('changePwdForm').reset();
+                document.getElementById('pwdModal').classList.remove('hidden');
+            });
+            document.getElementById('btnClosePwdModal').addEventListener('click', () => {
+                document.getElementById('pwdModal').classList.add('hidden');
+            });
+            document.getElementById('btnCancelPwd').addEventListener('click', () => {
+                document.getElementById('pwdModal').classList.add('hidden');
+            });
+            document.getElementById('changePwdForm').addEventListener('submit', handleChangePassword);
+
+            // Subida local para pruebas
+            document.getElementById('fileInput').addEventListener('change', handleManualFileUpload);
             
+            // Filtros
             document.getElementById('searchEstablecimiento').addEventListener('input', (e) => {
                 const text = e.target.value.trim();
                 const select = document.getElementById('filterEstablecimiento');
@@ -444,17 +544,143 @@
             document.getElementById('evalPrioFilter').addEventListener('change', renderEvalTable);
         });
 
-        function clearAllData() {
-            if (confirm("¿Deseas borrar los datos cargados y reiniciar el dashboard?")) {
-                currentData = [];
-                rawRecordsData = [];
-                globalSeenActos.clear();
-                isInitialState = true;
-                document.getElementById('btnClearData').classList.add('hidden');
-                document.getElementById('fileInput').value = '';
-                populateFilters();
-                updateDashboard();
+        // DESCARGA AUTOMÁTICA DE TODOS LOS MESES DESDE LA CARPETA data/
+        async function fetchCentralData() {
+            const loadingBar = document.getElementById('loadingStatus');
+            loadingBar.classList.remove('hidden');
+
+            // 1. Obtener la fecha del commit más reciente de mes_10.txt
+            try {
+                const commitRes = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/commits?path=data/mes_10.txt&page=1&per_page=1`);
+                if (commitRes.ok) {
+                    const commitData = await commitRes.json();
+                    if (commitData && commitData.length > 0) {
+                        const dateObj = new Date(commitData[0].commit.committer.date);
+                        document.getElementById('lblLastUpdate').innerText = dateObj.toLocaleDateString('es-PE') + ' ' + dateObj.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    }
+                }
+            } catch (e) {
+                document.getElementById('lblLastUpdate').innerText = "Servidor Activo";
             }
+
+            // 2. Descargar los 12 archivos mensuales en paralelo
+            currentData = [];
+            rawRecordsData = [];
+            globalSeenActos.clear();
+
+            const monthFiles = [
+                'mes_01.txt', 'mes_02.txt', 'mes_03.txt', 'mes_04.txt',
+                'mes_05.txt', 'mes_06.txt', 'mes_07.txt', 'mes_08.txt',
+                'mes_09.txt', 'mes_10.txt', 'mes_11.txt', 'mes_12.txt'
+            ];
+
+            const fetchPromises = monthFiles.map(file => 
+                fetch(`https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/data/${file}?t=${Date.now()}`)
+                    .then(res => res.ok ? res.text() : null)
+                    .catch(() => null)
+            );
+
+            const results = await Promise.all(fetchPromises);
+            let totalProcesados = 0;
+
+            results.forEach(text => {
+                if (!text) return;
+                const lines = text.split(/\r\n|\n/);
+                if (lines.length > 1) {
+                    let delim = '|';
+                    if (lines[0].includes('|')) delim = '|';
+                    else if (lines[0].includes(';')) delim = ';';
+                    else if (lines[0].includes(',')) delim = ',';
+                    const rows = lines.map(line => line.split(delim).map(c => c.trim()));
+                    totalProcesados += parseExcelToSummary(rows);
+                }
+            });
+
+            populateFilters();
+            updateDashboard();
+            loadingBar.classList.add('hidden');
+        }
+
+        // Manejo de Inicio de Sesión
+        function handleLogin(e) {
+            e.preventDefault();
+            const dni = document.getElementById('loginDni').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            const users = JSON.parse(localStorage.getItem('essalud_users')) || {};
+            const errEl = document.getElementById('loginError');
+
+            if (users[dni] && users[dni] === pass) {
+                activeUser = dni;
+                sessionStorage.setItem('essalud_session', dni);
+                document.getElementById('loginModal').classList.add('hidden');
+                errEl.classList.add('hidden');
+                applyRolePermissions();
+                fetchCentralData();
+            } else {
+                errEl.innerText = "DNI o Contraseña incorrectos.";
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        function checkSession() {
+            const saved = sessionStorage.getItem('essalud_session');
+            if (saved) {
+                activeUser = saved;
+                document.getElementById('loginModal').classList.add('hidden');
+                applyRolePermissions();
+                fetchCentralData();
+            } else {
+                document.getElementById('loginModal').classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('essalud_session');
+            activeUser = null;
+            location.reload();
+        }
+
+        function applyRolePermissions() {
+            document.getElementById('userBadge').innerText = `DNI: ${activeUser} ${activeUser === ADMIN_DNI ? '(ADMIN)' : ''}`;
+            const btnUpload = document.getElementById('btnUploadContainer');
+
+            if (activeUser === ADMIN_DNI) {
+                btnUpload.classList.remove('hidden');
+                btnUpload.classList.add('flex');
+            } else {
+                btnUpload.classList.add('hidden');
+                btnUpload.classList.remove('flex');
+            }
+        }
+
+        function handleChangePassword(e) {
+            e.preventDefault();
+            const oldP = document.getElementById('oldPass').value.trim();
+            const newP = document.getElementById('newPass').value.trim();
+            const confP = document.getElementById('confirmNewPass').value.trim();
+            const err = document.getElementById('pwdError');
+            const users = JSON.parse(localStorage.getItem('essalud_users')) || {};
+
+            if (users[activeUser] !== oldP) {
+                err.innerText = "La contraseña actual no es correcta.";
+                err.classList.remove('hidden');
+                return;
+            }
+            if (newP.length < 4) {
+                err.innerText = "La nueva contraseña debe tener al menos 4 caracteres.";
+                err.classList.remove('hidden');
+                return;
+            }
+            if (newP !== confP) {
+                err.innerText = "Las nuevas contraseñas no coinciden.";
+                err.classList.remove('hidden');
+                return;
+            }
+
+            users[activeUser] = newP;
+            localStorage.setItem('essalud_users', JSON.stringify(users));
+            alert("¡Contraseña actualizada con éxito!");
+            document.getElementById('pwdModal').classList.add('hidden');
         }
 
         function populateFilters() {
@@ -562,10 +788,9 @@
             let maxMeta = 20.0;
             if (prioSelected === 'P2') maxMeta = 10.0;
             else if (prioSelected === 'P3') maxMeta = 20.0;
-            else maxMeta = 20.0;
 
             if (rawRecordsData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">Cargue uno o varios archivos para ver los tiempos de atención</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">Sin datos cargados</td></tr>`;
                 return;
             }
 
@@ -579,19 +804,13 @@
                 const matchMes = (mesVal === 'ALL') || (r.monthIdx === parseInt(mesVal));
 
                 let matchPrio = false;
-                if (prioSelected === 'BOTH') {
-                    matchPrio = (r.prio === 'P2' || r.prio === 'P3');
-                } else if (prioSelected === 'P2') {
-                    matchPrio = (r.prio === 'P2');
-                } else if (prioSelected === 'P3') {
-                    matchPrio = (r.prio === 'P3');
-                }
+                if (prioSelected === 'BOTH') matchPrio = (r.prio === 'P2' || r.prio === 'P3');
+                else if (prioSelected === 'P2') matchPrio = (r.prio === 'P2');
+                else if (prioSelected === 'P3') matchPrio = (r.prio === 'P3');
 
                 if (matchEst && matchTop && matchMes && matchPrio) {
                     const groupKey = (evalViewMode === 'TOPICO') ? r.topic : r.doctor;
-                    if (!groupMap[groupKey]) {
-                        groupMap[groupKey] = { name: groupKey, suma: 0, count: 0 };
-                    }
+                    if (!groupMap[groupKey]) groupMap[groupKey] = { name: groupKey, suma: 0, count: 0 };
                     groupMap[groupKey].suma += r.diffMin;
                     groupMap[groupKey].count++;
                     grandSuma += r.diffMin;
@@ -600,37 +819,28 @@
             });
 
             const rows = Object.values(groupMap);
-
             if (rows.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">No se encontraron registros de Prioridad II o III para el filtro actual</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">No hay atenciones de P2 o P3 para el filtro seleccionado</td></tr>`;
                 return;
             }
 
-            rows.sort((a, b) => {
-                const promA = a.count > 0 ? (a.suma / a.count) : 0;
-                const promB = b.count > 0 ? (b.suma / b.count) : 0;
-                return promB - promA;
-            });
+            rows.sort((a, b) => (b.count > 0 ? b.suma / b.count : 0) - (a.count > 0 ? a.suma / a.count : 0));
 
             rows.forEach((item, idx) => {
                 const prom = item.count > 0 ? (item.suma / item.count) : 0;
                 const cumple = prom <= maxMeta;
-                const badgeClass = cumple ? 'bg-cyan-100 text-cyan-800' : 'bg-rose-100 text-rose-800 font-bold';
-                const numColor = cumple ? 'text-cyan-700 bg-cyan-50' : 'text-rose-700 bg-rose-50 font-bold';
-                const isTop1 = idx === 0 ? 'border-l-4 border-l-rose-500' : '';
-
                 const tr = document.createElement('tr');
-                tr.className = `hover:bg-slate-50 transition-colors ${isTop1}`;
+                tr.className = `hover:bg-slate-50 transition-colors ${idx === 0 ? 'border-l-4 border-l-rose-500' : ''}`;
                 tr.innerHTML = `
                     <td class="py-2.5 px-4 font-semibold text-slate-800 flex items-center gap-1.5">
-                        ${idx === 0 ? '<span class="text-xs text-rose-500 font-bold" title="Mayor tiempo de espera">⚠️</span>' : ''}
+                        ${idx === 0 ? '<span class="text-xs text-rose-500 font-bold" title="Mayor demora">⚠️</span>' : ''}
                         <span>${item.name}</span>
                     </td>
                     <td class="py-2.5 px-4 text-right">${Math.round(item.suma).toLocaleString('es-PE')}</td>
                     <td class="py-2.5 px-4 text-right">${item.count.toLocaleString('es-PE')}</td>
                     <td class="py-2.5 px-4 text-center font-semibold text-slate-500">${maxMeta.toFixed(1)}</td>
-                    <td class="py-2.5 px-4 text-center font-bold ${numColor}">${prom.toFixed(1)} min</td>
-                    <td class="py-2.5 px-4 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] ${badgeClass}">${cumple ? 'CUMPLE' : 'FALLA (EXCEDE)'}</span></td>
+                    <td class="py-2.5 px-4 text-center font-bold ${cumple ? 'text-cyan-700 bg-cyan-50' : 'text-rose-700 bg-rose-50'}">${prom.toFixed(1)} min</td>
+                    <td class="py-2.5 px-4 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] ${cumple ? 'bg-cyan-100 text-cyan-800' : 'bg-rose-100 text-rose-800 font-bold'}">${cumple ? 'CUMPLE' : 'EXCEDE'}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -672,10 +882,7 @@
                 const sumItem = item.m.reduce((a, b) => a + b, 0);
                 estMap[item.est] = (estMap[item.est] || 0) + sumItem;
                 topicMap[item.topic] = (topicMap[item.topic] || 0) + sumItem;
-
-                if (item.doctor) {
-                    docMap[item.doctor] = (docMap[item.doctor] || 0) + sumItem;
-                }
+                if (item.doctor) docMap[item.doctor] = (docMap[item.doctor] || 0) + sumItem;
             });
 
             document.getElementById('kpiTotal').innerText = total.toLocaleString('es-PE');
@@ -686,7 +893,7 @@
                 document.getElementById('kpiTopCentroVal').innerText = `${total.toLocaleString('es-PE')} atenciones`;
             } else {
                 document.getElementById('kpiTopCentro').innerText = "H.I ALBRECHT";
-                document.getElementById('kpiTopCentroVal').innerText = `${total.toLocaleString('es-PE')} atenciones totales`;
+                document.getElementById('kpiTopCentroVal').innerText = `${total.toLocaleString('es-PE')} atenciones`;
             }
 
             const topTopic = Object.entries(topicMap).sort((a,b) => b[1] - a[1])[0] || ['-', 0];
@@ -705,7 +912,6 @@
                     const matchMes = (mesVal === 'ALL') || (r.monthIdx === parseInt(mesVal));
 
                     if (matchEst && matchTop && matchMes) {
-                        // FÓRMULA OFICIAL ESSI: Sumatoria de minutos / conteo de pacientes
                         if (r.prio === 'P2') { sumP2 += r.diffMin; countP2++; }
                         else if (r.prio === 'P3') { sumP3 += r.diffMin; countP3++; }
 
@@ -715,7 +921,6 @@
                     }
                 });
 
-                // Promedios oficiales
                 document.getElementById('kpiTimeP2').innerText = countP2 > 0 ? `${(sumP2 / countP2).toFixed(1)} min` : '-';
                 document.getElementById('kpiCountP2').innerText = `${countP2.toLocaleString('es-PE')} casos P2`;
 
@@ -726,7 +931,6 @@
             }
 
             updateCharts(monthlyTotals, estMap, topicMap, docMap, topDiagsList, total);
-
             currentPage = 1;
             renderTable();
             renderEvalTable();
@@ -736,7 +940,7 @@
             const ctxTrend = document.getElementById('chartTrend').getContext('2d');
             chartTrend = new Chart(ctxTrend, {
                 type: 'bar',
-                data: { labels: MONTHS, datasets: [{ label: 'Atenciones', data: [], backgroundColor: 'rgba(37, 99, 235, 0.85)', borderColor: '#1d4ed8', borderWidth: 1, borderRadius: 6 }] },
+                data: { labels: MONTHS, datasets: [{ label: 'Atenciones', data: [], backgroundColor: 'rgba(37, 99, 235, 0.85)', borderRadius: 6 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
             });
 
@@ -759,7 +963,7 @@
                 type: 'doughnut',
                 data: {
                     labels: ['P3 Urgencia Mayor', 'P4 Urgencia Menor', 'P5 Consulta', 'P2 Emergencia', 'P1 Riesgo Vida'],
-                    datasets: [{ data: [8244, 747, 284, 251, 5], backgroundColor: ['#2563eb', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'] }]
+                    datasets: [{ data: [0, 0, 0, 0, 0], backgroundColor: ['#2563eb', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'] }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } } } }
             });
@@ -811,6 +1015,17 @@
                 ulDiags.appendChild(li);
             });
 
+            let p1 = 0, p2 = 0, p3 = 0, p4 = 0, p5 = 0;
+            rawRecordsData.forEach(r => {
+                if (r.prio === 'P1') p1++;
+                else if (r.prio === 'P2') p2++;
+                else if (r.prio === 'P3') p3++;
+                else if (r.prio === 'P4') p4++;
+                else if (r.prio === 'P5') p5++;
+            });
+            chartPrioridad.data.datasets[0].data = [p3, p4, p5, p2, p1];
+            chartPrioridad.update();
+
             const sortedEsts = Object.entries(estMap).sort((a,b) => b[1] - a[1]).slice(0, 6);
             chartEstablecimientos.data.labels = sortedEsts.map(e => e[0]);
             chartEstablecimientos.data.datasets[0].data = sortedEsts.map(e => e[1]);
@@ -825,10 +1040,7 @@
         function renderTable() {
             const consolidated = getConsolidatedTableData();
             const searchTerm = document.getElementById('tableSearch').value.toLowerCase().trim();
-            
-            const searchFiltered = consolidated.filter(item => 
-                !searchTerm || item.topic.toLowerCase().includes(searchTerm)
-            );
+            const searchFiltered = consolidated.filter(item => !searchTerm || item.topic.toLowerCase().includes(searchTerm));
 
             const totalRows = searchFiltered.length;
             const totalPages = Math.ceil(totalRows / pageSize) || 1;
@@ -841,7 +1053,7 @@
             tbody.innerHTML = '';
 
             if (pageData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="15" class="text-center py-6 text-slate-400">No se encontraron tópicos para el criterio seleccionado</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="15" class="text-center py-6 text-slate-400">Sin datos que coincidan con la búsqueda</td></tr>`;
             } else {
                 pageData.forEach(item => {
                     const tr = document.createElement('tr');
@@ -873,107 +1085,49 @@
         function parseExcelDateTime(valDate, valTime) {
             if (!valDate) return null;
             if (valDate instanceof Date) return valDate;
-
-            if (typeof valDate === 'number') {
-                return new Date(Math.round((valDate - 25569) * 86400 * 1000));
-            }
+            if (typeof valDate === 'number') return new Date(Math.round((valDate - 25569) * 86400 * 1000));
 
             let dateStr = String(valDate).trim();
-            if (valTime) {
-                dateStr += ' ' + String(valTime).trim();
-            }
+            if (valTime) dateStr += ' ' + String(valTime).trim();
 
             if (dateStr.includes('/')) {
                 const parts = dateStr.split(' ');
                 const dateParts = parts[0].split('/');
-                if (dateParts.length === 3) {
-                    if (dateParts[2].length === 4) {
-                        dateStr = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}` + (parts[1] ? ' ' + parts[1] : '');
-                    }
+                if (dateParts.length === 3 && dateParts[2].length === 4) {
+                    dateStr = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}` + (parts[1] ? ' ' + parts[1] : '');
                 }
             }
-
             dateStr = dateStr.replace('T', ' ').replace(/\//g, '-');
             const parsed = new Date(dateStr);
             return isNaN(parsed.getTime()) ? null : parsed;
         }
 
-        async function handleFileUpload(e) {
+        async function handleManualFileUpload(e) {
             const files = e.target.files;
             if (!files || files.length === 0) return;
-
-            if (isInitialState) {
-                currentData = [];
-                rawRecordsData = [];
-                globalSeenActos.clear();
-                isInitialState = false;
-            }
-
-            document.getElementById('btnClearData').classList.remove('hidden');
-
-            let totalArchivosProcesados = 0;
-            let totalFilasGlobal = 0;
-
-            for (let f = 0; f < files.length; f++) {
-                const file = files[f];
-                const rows = await readFileRows(file);
-                if (rows && rows.length > 1) {
-                    totalFilasGlobal += parseExcelToSummary(rows);
-                    totalArchivosProcesados++;
+            const file = files[0];
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const content = evt.target.result;
+                const lines = content.split(/\r\n|\n/);
+                if (lines.length > 1) {
+                    let delim = '|';
+                    if (lines[0].includes('|')) delim = '|';
+                    else if (lines[0].includes(';')) delim = ';';
+                    else if (lines[0].includes(',')) delim = ',';
+                    const rows = lines.map(line => line.split(delim).map(c => c.trim()));
+                    currentData = [];
+                    rawRecordsData = [];
+                    globalSeenActos.clear();
+                    const n = parseExcelToSummary(rows);
+                    populateFilters();
+                    updateDashboard();
+                    alert(`Archivo de prueba cargado: ${n.toLocaleString('es-PE')} atenciones.`);
                 }
-            }
-
-            populateFilters();
-            updateDashboard();
-            alert(`¡Carga completada!\n\n• Archivos procesados: ${totalArchivosProcesados}\n• Atenciones acumuladas únicas: ${totalFilasGlobal.toLocaleString('es-PE')}`);
+            };
+            reader.readAsText(file, 'latin1');
         }
 
-        function readFileRows(file) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-
-                if (file.name.endsWith('.txt') || file.name.endsWith('.csv')) {
-                    reader.onload = function(evt) {
-                        try {
-                            const content = evt.target.result;
-                            const lines = content.split(/\r\n|\n/);
-                            if (lines.length <= 1) { resolve(null); return; }
-
-                            const firstLine = lines[0];
-                            let delim = '|';
-                            if (firstLine.includes('|')) delim = '|';
-                            else if (firstLine.includes(';')) delim = ';';
-                            else if (firstLine.includes(',')) delim = ',';
-
-                            const jsonData = lines.map(line => line.split(delim).map(cell => cell.trim()));
-                            resolve(jsonData);
-                        } catch (err) {
-                            console.error(err);
-                            resolve(null);
-                        }
-                    };
-                    reader.readAsText(file, 'latin1');
-                } else {
-                    reader.onload = function(evt) {
-                        try {
-                            const data = new Uint8Array(evt.target.result);
-                            const workbook = XLSX.read(data, { type: 'array', cellDates: true });
-                            let targetSheet = workbook.Sheets[workbook.SheetNames[1]] || workbook.Sheets[workbook.SheetNames[0]];
-                            const jsonData = XLSX.utils.sheet_to_json(targetSheet, { header: 1, raw: false, dateNF: 'yyyy-mm-dd hh:mm:ss' });
-                            resolve(jsonData);
-                        } catch (err) {
-                            console.error(err);
-                            resolve(null);
-                        }
-                    };
-                    reader.readAsArrayBuffer(file);
-                }
-            });
-        }
-
-        // =========================================================================
-        // PROCESAMIENTO OFICIAL ESSI: DEDUPLICACIÓN EXACTA Y CALCE DE OBSERVACIÓN
-        // =========================================================================
         function parseExcelToSummary(rows) {
             const headerRow = rows[0].map(c => String(c).toUpperCase());
 
@@ -1003,12 +1157,8 @@
                 if (!r || !r[idxEst]) continue;
 
                 const actoMed = idxActoMed !== -1 && r[idxActoMed] ? String(r[idxActoMed]).trim() : `FILA_${i}`;
-
-                // Excluir actos cancelados o sin atención médica concluida
                 const resultAtencion = idxResult !== -1 && r[idxResult] ? String(r[idxResult]).trim().toUpperCase() : '';
-                if (resultAtencion.includes('RETIRO VOLUNTARIO') || resultAtencion === '') {
-                    continue;
-                }
+                if (resultAtencion.includes('RETIRO VOLUNTARIO') || resultAtencion === '') continue;
 
                 const est = String(r[idxEst]).trim();
                 let rawTopic = String(r[idxTopico] || 'MEDICINA 1').trim();
@@ -1019,7 +1169,6 @@
                 const desc = idxDescDiag !== -1 && r[idxDescDiag] ? String(r[idxDescDiag]).trim() : 'NO REGISTRADO';
                 const diagLabel = code ? `${code} - ${desc}` : desc;
 
-                // Detección del mes
                 let monthIdx = -1;
                 if (idxPeriodo !== -1 && r[idxPeriodo]) {
                     const perStr = String(r[idxPeriodo]).trim();
@@ -1040,23 +1189,14 @@
                 }
                 if (monthIdx === -1 || monthIdx > 11) monthIdx = 0;
 
-                // Identificación de Prioridad oficial
                 let prio = null;
                 const prioStr = String(r[idxPrio] || '').trim().toUpperCase();
+                if (prioStr.includes('PRIORIDAD III') || prioStr.includes('URGENCIA MAYOR') || prioStr === '3' || prioStr === 'P3') prio = 'P3';
+                else if (prioStr.includes('PRIORIDAD II') || prioStr.includes('EMERGENCIA') || prioStr === '2' || prioStr === 'P2') prio = 'P2';
+                else if (prioStr.includes('PRIORIDAD IV') || prioStr.includes('URGENCIA MENOR') || prioStr === '4' || prioStr === 'P4') prio = 'P4';
+                else if (prioStr.includes('PRIORIDAD V') || prioStr.includes('CONSULTA') || prioStr === '5' || prioStr === 'P5') prio = 'P5';
+                else if (prioStr.includes('PRIORIDAD I') || prioStr === '1' || prioStr === 'P1') prio = 'P1';
 
-                if (prioStr.includes('PRIORIDAD III') || prioStr.includes('URGENCIA MAYOR') || prioStr === '3' || prioStr === 'P3') {
-                    prio = 'P3';
-                } else if (prioStr.includes('PRIORIDAD II') || prioStr.includes('EMERGENCIA') || prioStr === '2' || prioStr === 'P2') {
-                    prio = 'P2';
-                } else if (prioStr.includes('PRIORIDAD IV') || prioStr.includes('URGENCIA MENOR') || prioStr === '4' || prioStr === 'P4') {
-                    prio = 'P4';
-                } else if (prioStr.includes('PRIORIDAD V') || prioStr.includes('CONSULTA') || prioStr === '5' || prioStr === 'P5') {
-                    prio = 'P5';
-                } else if (prioStr.includes('PRIORIDAD I') || prioStr === '1' || prioStr === 'P1') {
-                    prio = 'P1';
-                }
-
-                // Cálculo de tiempo: Hora Atención - Hora Admisión/Triaje
                 let calcDiff = 0;
                 let dtAtenObj = null;
 
@@ -1067,15 +1207,10 @@
 
                     if (dtReg && dtAten) {
                         const diff = (dtAten.getTime() - dtReg.getTime()) / (1000 * 60);
-                        // Filtro de consistencia oficial GCOP EsSalud:
                         if (!isNaN(diff) && diff >= 0 && diff < 1440) {
-                            if (prio === 'P2') {
-                                calcDiff = Math.min(diff, 180);
-                            } else if (prio === 'P3') {
-                                calcDiff = Math.min(diff, 108);
-                            } else {
-                                calcDiff = Math.min(diff, 140);
-                            }
+                            if (prio === 'P2') calcDiff = Math.min(diff, 180);
+                            else if (prio === 'P3') calcDiff = Math.min(diff, 108);
+                            else calcDiff = Math.min(diff, 140);
                         }
                     }
                 }
@@ -1086,7 +1221,6 @@
                     esObservacion: topic.includes('OBSERVACION')
                 };
 
-                // REGLA CLÍNICA ESSI: Si el paciente tiene atención en tópico primario, se le asigna ese tópico y no la cama de observación
                 if (!mapaActos.has(actoMed)) {
                     mapaActos.set(actoMed, itemActual);
                 } else {
@@ -1106,10 +1240,7 @@
             }
 
             listaUnica.sort((a, b) => a.timeKey - b.timeKey);
-
-            listaUnica.forEach(item => {
-                rawRecordsData.push(item);
-            });
+            listaUnica.forEach(item => rawRecordsData.push(item));
 
             const summaryMap = {};
             currentData.forEach(item => {
@@ -1118,7 +1249,6 @@
             });
 
             let totalNuevos = 0;
-
             listaUnica.forEach(item => {
                 const key = `${item.est}___${item.topic}___${item.doctor}`;
                 if (!summaryMap[key]) {
