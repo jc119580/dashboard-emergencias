@@ -1202,7 +1202,25 @@
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: { padding: { right: 42 } },
+                    layout: { padding: { left: 4, right: 38 } },
+                    scales: {
+                        y: {
+                            ticks: {
+                                font: { size: 9.5 },
+                                autoSkip: false,
+                                callback: function(value) {
+                                    const label = this.getLabelForValue(value);
+                                    if (label && label.length > 20) {
+                                        const palabras = label.split(' ');
+                                        if (palabras.length >= 3) {
+                                            return [palabras.slice(0, 2).join(' '), palabras.slice(2).join(' ')];
+                                        }
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
                     plugins: {
                         legend: { display: false },
                         datalabels: horizontalBarLabels
