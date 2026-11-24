@@ -252,6 +252,13 @@
                 <select id="filterMes" class="bg-slate-50 border border-slate-300 text-slate-700 text-xs sm:text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     <option value="ALL">Todos los Meses</option>
                 </select>
+
+                <select id="filterTurno" class="bg-blue-50 border border-blue-300 text-blue-900 font-medium text-xs sm:text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <option value="ALL">🕒 Todos los Turnos</option>
+                    <option value="MAÑANA">☀️ Mañana (07:00 - 13:59)</option>
+                    <option value="TARDE">🌤️ Tarde (14:00 - 19:59)</option>
+                    <option value="NOCHE">🌙 Noche (20:00 - 06:59)</option>
+                </select>
             </div>
 
             <div class="flex items-center space-x-2 w-full lg:w-auto justify-end">
@@ -446,6 +453,79 @@
             </div>
         </div>
 
+        <!-- SECCIÓN ESTADÍSTICA POR TURNOS (MAÑANA, TARDE Y NOCHE) Y DIAGNÓSTICOS -->
+        <div class="bg-white rounded-xl border border-indigo-200 shadow-md overflow-hidden">
+            <div class="p-5 bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <h3 class="font-bold text-base sm:text-lg flex items-center gap-2">
+                        <i data-lucide="clock-3" class="w-5 h-5 text-cyan-400"></i>
+                        <span>Atenciones por Turnos (Mañana, Tarde y Noche) y Perfil Diagnóstico</span>
+                    </h3>
+                    <p class="text-xs text-slate-300 mt-0.5">
+                        Mañana: <span class="text-amber-300 font-semibold">07:00 - 13:59</span> |
+                        Tarde: <span class="text-cyan-300 font-semibold">14:00 - 19:59</span> |
+                        Noche: <span class="text-indigo-300 font-semibold">20:00 - 06:59</span>
+                    </p>
+                </div>
+                <div class="no-print flex items-center gap-2">
+                    <select id="turnoDiagTopLimit" class="bg-slate-800 text-white text-xs border border-slate-600 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                        <option value="10">Top 10 Diagnósticos</option>
+                        <option value="15">Top 15 Diagnósticos</option>
+                        <option value="25">Top 25 Diagnósticos</option>
+                        <option value="ALL">Todos los Diagnósticos</option>
+                    </select>
+                    <button id="btnExportTurnos" class="px-3 py-1.5 text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg transition-colors flex items-center gap-1.5 shadow">
+                        <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+                        <span>Exportar Excel</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-5 grid grid-cols-1 lg:grid-cols-3 gap-6 border-b border-slate-100">
+                <!-- Gráfico de Distribución por Turno -->
+                <div class="lg:col-span-1 flex flex-col justify-between bg-slate-50/70 p-4 rounded-xl border border-slate-200/80">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1.5">
+                            <i data-lucide="bar-chart-2" class="w-4 h-4 text-blue-600"></i>
+                            Total Atenciones por Turno
+                        </h4>
+                    </div>
+                    <div class="h-56 relative chart-container">
+                        <canvas id="chartTurnos"></canvas>
+                    </div>
+                    <div id="turnoCardsSummary" class="grid grid-cols-3 gap-2 mt-3 text-center"></div>
+                </div>
+
+                <!-- Tabla Cruzada: Diagnósticos por Turno -->
+                <div class="lg:col-span-2 flex flex-col">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <h4 class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1.5">
+                            <i data-lucide="table" class="w-4 h-4 text-indigo-600"></i>
+                            Matriz de Diagnósticos CIE-10 por Turno Asistencial
+                        </h4>
+                        <input type="text" id="turnoDiagSearch" placeholder="🔍 Filtrar código CIE-10 o diagnóstico..." class="no-print bg-slate-50 border border-slate-300 text-slate-700 text-xs rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none w-full sm:w-64">
+                    </div>
+                    <div class="overflow-x-auto overflow-y-auto max-h-72 border border-slate-200 rounded-lg">
+                        <table class="w-full text-xs text-left text-slate-600">
+                            <thead class="bg-slate-100 text-slate-700 font-semibold uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
+                                <tr>
+                                    <th class="py-2.5 px-3">Código CIE-10 + Diagnóstico</th>
+                                    <th class="py-2.5 px-2.5 text-right text-amber-800 bg-amber-50/80">☀️ Mañana</th>
+                                    <th class="py-2.5 px-2.5 text-right text-cyan-800 bg-cyan-50/80">🌤️ Tarde</th>
+                                    <th class="py-2.5 px-2.5 text-right text-indigo-900 bg-indigo-50/80">🌙 Noche</th>
+                                    <th class="py-2.5 px-3 text-right font-bold text-blue-950 bg-slate-200/80">Total</th>
+                                    <th class="py-2.5 px-2.5 text-right">% Part.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="turnoDiagTableBody" class="divide-y divide-slate-100">
+                                <tr><td colspan="6" class="text-center py-6 text-slate-400">Cargando estadísticas por turno...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Charts Grid Row 2 -->
         <div class="print-grid-3 grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
@@ -554,13 +634,14 @@
         let rawRecordsData = [];
         let globalSeenActos = new Set();
         let evalViewMode = 'TOPICO';
-        let chartTrend, chartPrioridad, chartEstablecimientos, chartTopicos, chartMedicos, chartDiagnosticos;
+        let chartTrend, chartPrioridad, chartEstablecimientos, chartTopicos, chartMedicos, chartDiagnosticos, chartTurnos;
+        let lastTurnoDiagExportData = [];
         let currentPage = 1;
         const pageSize = 8;
         let activeUser = null;
 
         const DB_NAME = 'AlbrechtEmergenciasDB';
-        const DB_VERSION = 1;
+        const DB_VERSION = 2;
 
         function openIndexedDB() {
             return new Promise((resolve, reject) => {
@@ -621,7 +702,7 @@
         }
 
         function prepararGraficosParaImpresion() {
-            const charts = [chartTrend, chartPrioridad, chartEstablecimientos, chartTopicos, chartMedicos, chartDiagnosticos];
+            const charts = [chartTrend, chartPrioridad, chartEstablecimientos, chartTopicos, chartMedicos, chartDiagnosticos, chartTurnos];
             charts.forEach(chart => {
                 if (!chart || !chart.canvas) return;
                 const canvas = chart.canvas;
@@ -709,6 +790,10 @@
 
             document.getElementById('filterTopico').addEventListener('change', updateDashboard);
             document.getElementById('filterMes').addEventListener('change', updateDashboard);
+            document.getElementById('filterTurno').addEventListener('change', updateDashboard);
+            document.getElementById('turnoDiagTopLimit').addEventListener('change', renderTurnoStats);
+            document.getElementById('turnoDiagSearch').addEventListener('input', renderTurnoStats);
+            document.getElementById('btnExportTurnos').addEventListener('click', exportTurnosToExcel);
             document.getElementById('resetFilters').addEventListener('click', resetFilters);
             document.getElementById('tableSearch').addEventListener('input', () => { currentPage = 1; renderTable(); });
             document.getElementById('btnPrev').addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
@@ -948,10 +1033,46 @@
             return 'ALL';
         }
 
+        function getTurnoFromHour(hourNum) {
+            if (isNaN(hourNum) || hourNum === null || hourNum === undefined) return 'SIN HORA';
+            if (hourNum >= 7 && hourNum < 14) return 'MAÑANA';
+            if (hourNum >= 14 && hourNum < 20) return 'TARDE';
+            return 'NOCHE';
+        }
+
+        function getRecordTurno(r) {
+            if (r.turno) return r.turno;
+            if (r.timeKey) {
+                const d = new Date(r.timeKey);
+                if (!isNaN(d.getTime())) return getTurnoFromHour(d.getHours());
+            }
+            return 'SIN HORA';
+        }
+
         function getFilteredData() {
             const activeIPRESS = getActiveIPRESS();
             const topico = document.getElementById('filterTopico').value;
             const mesIdx = document.getElementById('filterMes').value;
+            const turnoVal = document.getElementById('filterTurno').value;
+
+            if (turnoVal !== 'ALL' && rawRecordsData.length > 0) {
+                const tempMap = {};
+                rawRecordsData.forEach(r => {
+                    const rTurno = getRecordTurno(r);
+                    if (rTurno !== turnoVal) return;
+                    const matchEst = (activeIPRESS === 'ALL') || (r.est === activeIPRESS);
+                    const matchTopico = (topico === 'ALL') || (r.topic === topico);
+                    const matchMes = (mesIdx === 'ALL') || (r.monthIdx === parseInt(mesIdx));
+                    if (matchEst && matchTopico && matchMes) {
+                        const key = `${r.est}___${r.topic}___${r.doctor}`;
+                        if (!tempMap[key]) {
+                            tempMap[key] = { est: r.est, topic: r.topic, doctor: r.doctor, m: [0,0,0,0,0,0,0,0,0,0,0,0] };
+                        }
+                        tempMap[key].m[r.monthIdx]++;
+                    }
+                });
+                return Object.values(tempMap);
+            }
 
             return currentData.filter(item => {
                 const matchEst = (activeIPRESS === 'ALL') || (item.est === activeIPRESS);
@@ -970,8 +1091,11 @@
             const activeIPRESS = getActiveIPRESS();
             const selectTopic = document.getElementById('filterTopico').value;
             const mesVal = document.getElementById('filterMes').value;
+            const turnoVal = document.getElementById('filterTurno').value;
 
-            const filteredData = currentData.filter(item => {
+            const sourceData = (turnoVal !== 'ALL') ? getFilteredData() : currentData;
+
+            const filteredData = sourceData.filter(item => {
                 const matchEst = (activeIPRESS === 'ALL') || (item.est === activeIPRESS);
                 const matchTop = (selectTopic === 'ALL') || (item.topic === selectTopic);
                 return matchEst && matchTop;
@@ -1005,6 +1129,7 @@
             const prioSelected = document.getElementById('evalPrioFilter').value;
             const mesVal = document.getElementById('filterMes').value;
             const selectTopic = document.getElementById('filterTopico').value;
+            const turnoVal = document.getElementById('filterTurno').value;
 
             let maxMeta = 20.0;
             if (prioSelected === 'P2') maxMeta = 10.0;
@@ -1029,7 +1154,8 @@
                 else if (prioSelected === 'P2') matchPrio = (r.prio === 'P2');
                 else if (prioSelected === 'P3') matchPrio = (r.prio === 'P3');
 
-                if (matchEst && matchTop && matchMes && matchPrio) {
+                const matchTurno = (turnoVal === 'ALL') || (getRecordTurno(r) === turnoVal);
+                if (matchEst && matchTop && matchMes && matchPrio && matchTurno) {
                     const groupKey = (evalViewMode === 'TOPICO') ? r.topic : r.doctor;
                     if (!groupMap[groupKey]) groupMap[groupKey] = { name: groupKey, suma: 0, count: 0 };
                     groupMap[groupKey].suma += r.diffMin;
@@ -1081,11 +1207,136 @@
             tbody.appendChild(trTotal);
         }
 
+        function renderTurnoStats() {
+            const tbody = document.getElementById('turnoDiagTableBody');
+            const summaryBox = document.getElementById('turnoCardsSummary');
+            if (!tbody || !summaryBox) return;
+
+            const activeIPRESS = getActiveIPRESS();
+            const selectTopic = document.getElementById('filterTopico').value;
+            const mesVal = document.getElementById('filterMes').value;
+            const turnoVal = document.getElementById('filterTurno').value;
+            const topLimit = document.getElementById('turnoDiagTopLimit').value;
+            const searchQuery = document.getElementById('turnoDiagSearch').value.toLowerCase().trim();
+
+            let countManana = 0, countTarde = 0, countNoche = 0, countSinHora = 0;
+            const diagTurnoMap = {};
+
+            rawRecordsData.forEach(r => {
+                const matchEst = (activeIPRESS === 'ALL') || (r.est === activeIPRESS);
+                const matchTop = (selectTopic === 'ALL') || (r.topic === selectTopic);
+                const matchMes = (mesVal === 'ALL') || (r.monthIdx === parseInt(mesVal));
+                const rTurno = getRecordTurno(r);
+                const matchTurno = (turnoVal === 'ALL') || (rTurno === turnoVal);
+
+                if (matchEst && matchTop && matchMes && matchTurno) {
+                    if (rTurno === 'MAÑANA') countManana++;
+                    else if (rTurno === 'TARDE') countTarde++;
+                    else if (rTurno === 'NOCHE') countNoche++;
+                    else countSinHora++;
+
+                    const diag = (r.diagLabel && r.diagLabel !== 'NO REGISTRADO') ? r.diagLabel : 'SIN DIAGNÓSTICO REGISTRADO';
+                    if (!diagTurnoMap[diag]) {
+                        diagTurnoMap[diag] = { diag, MAÑANA: 0, TARDE: 0, NOCHE: 0, SIN_HORA: 0, total: 0 };
+                    }
+                    if (rTurno === 'MAÑANA') diagTurnoMap[diag].MAÑANA++;
+                    else if (rTurno === 'TARDE') diagTurnoMap[diag].TARDE++;
+                    else if (rTurno === 'NOCHE') diagTurnoMap[diag].NOCHE++;
+                    else diagTurnoMap[diag].SIN_HORA++;
+                    diagTurnoMap[diag].total++;
+                }
+            });
+
+            const totalTurnos = countManana + countTarde + countNoche + countSinHora;
+
+            if (chartTurnos) {
+                chartTurnos.data.datasets[0].data = [countManana, countTarde, countNoche];
+                chartTurnos.update();
+            }
+
+            const pctM = totalTurnos > 0 ? ((countManana / totalTurnos) * 100).toFixed(1) : '0.0';
+            const pctT = totalTurnos > 0 ? ((countTarde / totalTurnos) * 100).toFixed(1) : '0.0';
+            const pctN = totalTurnos > 0 ? ((countNoche / totalTurnos) * 100).toFixed(1) : '0.0';
+
+            summaryBox.innerHTML = `
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-2">
+                    <span class="block text-[10px] font-bold text-amber-800 uppercase">☀️ Mañana</span>
+                    <span class="block text-sm font-bold text-slate-900">${countManana.toLocaleString('es-PE')}</span>
+                    <span class="block text-[10px] text-amber-700 font-semibold">${pctM}%</span>
+                </div>
+                <div class="bg-cyan-50 border border-cyan-200 rounded-lg p-2">
+                    <span class="block text-[10px] font-bold text-cyan-800 uppercase">🌤️ Tarde</span>
+                    <span class="block text-sm font-bold text-slate-900">${countTarde.toLocaleString('es-PE')}</span>
+                    <span class="block text-[10px] text-cyan-700 font-semibold">${pctT}%</span>
+                </div>
+                <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-2">
+                    <span class="block text-[10px] font-bold text-indigo-900 uppercase">🌙 Noche</span>
+                    <span class="block text-sm font-bold text-slate-900">${countNoche.toLocaleString('es-PE')}</span>
+                    <span class="block text-[10px] text-indigo-700 font-semibold">${pctN}%</span>
+                </div>
+            `;
+
+            let diagList = Object.values(diagTurnoMap).sort((a, b) => b.total - a.total);
+            lastTurnoDiagExportData = diagList;
+
+            if (searchQuery) {
+                diagList = diagList.filter(d => d.diag.toLowerCase().includes(searchQuery));
+            }
+            if (topLimit !== 'ALL') {
+                diagList = diagList.slice(0, parseInt(topLimit, 10));
+            }
+
+            tbody.innerHTML = '';
+            if (diagList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">No hay registros de diagnósticos para los filtros seleccionados</td></tr>`;
+                return;
+            }
+
+            diagList.forEach((item, idx) => {
+                const pctPart = totalTurnos > 0 ? ((item.total / totalTurnos) * 100).toFixed(2) : '0.00';
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="py-2 px-3 font-medium text-slate-800">
+                        <span class="text-slate-400 font-bold mr-1.5">${idx + 1}.</span>${item.diag}
+                    </td>
+                    <td class="py-2 px-2.5 text-right font-semibold text-amber-800 bg-amber-50/40">${item.MAÑANA.toLocaleString('es-PE')}</td>
+                    <td class="py-2 px-2.5 text-right font-semibold text-cyan-800 bg-cyan-50/40">${item.TARDE.toLocaleString('es-PE')}</td>
+                    <td class="py-2 px-2.5 text-right font-semibold text-indigo-900 bg-indigo-50/40">${item.NOCHE.toLocaleString('es-PE')}</td>
+                    <td class="py-2 px-3 text-right font-bold text-blue-950 bg-slate-100/80">${item.total.toLocaleString('es-PE')}</td>
+                    <td class="py-2 px-2.5 text-right text-slate-500">${pctPart}%</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function exportTurnosToExcel() {
+            if (!lastTurnoDiagExportData || lastTurnoDiagExportData.length === 0) {
+                alert("No hay datos de turnos para exportar.");
+                return;
+            }
+            const totalGeneral = lastTurnoDiagExportData.reduce((acc, r) => acc + r.total, 0);
+            const wsData = [
+                ["N°", "CÓDIGO CIE-10 + DIAGNÓSTICO", "TURNO MAÑANA (07:00-13:59)", "TURNO TARDE (14:00-19:59)", "TURNO NOCHE (20:00-06:59)", "TOTAL ATENCIONES", "% PARTICIPACIÓN"]
+            ];
+            lastTurnoDiagExportData.forEach((item, i) => {
+                const pct = totalGeneral > 0 ? ((item.total / totalGeneral) * 100).toFixed(2) + '%' : '0.00%';
+                wsData.push([i + 1, item.diag, item.MAÑANA, item.TARDE, item.NOCHE, item.total, pct]);
+            });
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            ws['!cols'] = [{ wch: 6 }, { wch: 52 }, { wch: 24 }, { wch: 24 }, { wch: 24 }, { wch: 18 }, { wch: 16 }];
+            XLSX.utils.book_append_sheet(wb, ws, "Turnos_Diagnosticos");
+            XLSX.writeFile(wb, "Estadistica_Turnos_Diagnosticos_Emergencia.xlsx");
+        }
+
+
         function updateDashboard() {
             const filtered = getFilteredData();
             const activeIPRESS = getActiveIPRESS();
             const mesVal = document.getElementById('filterMes').value;
             const selectTopic = document.getElementById('filterTopico').value;
+            const turnoVal = document.getElementById('filterTurno').value;
 
             let total = 0;
             const monthlyTotals = [0,0,0,0,0,0,0,0,0,0,0,0];
@@ -1131,8 +1382,9 @@
                     const matchEst = (activeIPRESS === 'ALL') || (r.est === activeIPRESS);
                     const matchTop = (selectTopic === 'ALL') || (r.topic === selectTopic);
                     const matchMes = (mesVal === 'ALL') || (r.monthIdx === parseInt(mesVal));
+                    const matchTurno = (turnoVal === 'ALL') || (getRecordTurno(r) === turnoVal);
 
-                    if (matchEst && matchTop && matchMes) {
+                    if (matchEst && matchTop && matchMes && matchTurno) {
                         if (r.prio === 'P2') { sumP2 += r.diffMin; countP2++; }
                         else if (r.prio === 'P3') { sumP3 += r.diffMin; countP3++; }
 
@@ -1155,6 +1407,7 @@
             currentPage = 1;
             renderTable();
             renderEvalTable();
+            renderTurnoStats();
         }
 
         function initCharts() {
@@ -1300,6 +1553,30 @@
                     }
                 }
             });
+
+            const ctxTurnos = document.getElementById('chartTurnos').getContext('2d');
+            chartTurnos = new Chart(ctxTurnos, {
+                type: 'bar',
+                data: {
+                    labels: ['Mañana (07-14h)', 'Tarde (14-20h)', 'Noche (20-07h)'],
+                    datasets: [{
+                        label: 'Atenciones',
+                        data: [0, 0, 0],
+                        backgroundColor: ['#f59e0b', '#06b6d4', '#312e81'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: { top: 22 } },
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: verticalBarLabels
+                    },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
         }
 
         function updateCharts(monthlyTotals, estMap, topicMap, docMap, topDiagsList, grandTotal) {
@@ -1334,8 +1611,16 @@
                 ulDiags.appendChild(li);
             });
 
+            const actIPRESS = getActiveIPRESS();
+            const selTop = document.getElementById('filterTopico').value;
+            const selMes = document.getElementById('filterMes').value;
+            const selTur = document.getElementById('filterTurno').value;
             let p1 = 0, p2 = 0, p3 = 0, p4 = 0, p5 = 0;
             rawRecordsData.forEach(r => {
+                if (actIPRESS !== 'ALL' && r.est !== actIPRESS) return;
+                if (selTop !== 'ALL' && r.topic !== selTop) return;
+                if (selMes !== 'ALL' && r.monthIdx !== parseInt(selMes)) return;
+                if (selTur !== 'ALL' && getRecordTurno(r) !== selTur) return;
                 if (r.prio === 'P1') p1++;
                 else if (r.prio === 'P2') p2++;
                 else if (r.prio === 'P3') p3++;
@@ -1397,7 +1682,10 @@
             document.getElementById('filterEstablecimiento').value = 'ALL';
             document.getElementById('filterTopico').value = 'ALL';
             document.getElementById('filterMes').value = 'ALL';
+            document.getElementById('filterTurno').value = 'ALL';
             document.getElementById('tableSearch').value = '';
+            const tSearch = document.getElementById('turnoDiagSearch');
+            if (tSearch) tSearch.value = '';
             updateDashboard();
         }
 
@@ -1519,10 +1807,16 @@
                 let calcDiff = 0;
                 let dtAtenObj = null;
 
+                if (idxFechaAten !== -1 && r[idxFechaAten]) {
+                    dtAtenObj = parseExcelDateTime(r[idxFechaAten], idxHoraAten !== -1 ? r[idxHoraAten] : '');
+                }
+                if (!dtAtenObj && idxRegAdm !== -1 && r[idxRegAdm]) {
+                    dtAtenObj = parseExcelDateTime(r[idxRegAdm]);
+                }
+
                 if (idxRegAdm !== -1 && idxFechaAten !== -1 && r[idxRegAdm] && r[idxFechaAten]) {
                     const dtReg = parseExcelDateTime(r[idxRegAdm]);
-                    const dtAten = parseExcelDateTime(r[idxFechaAten], idxHoraAten !== -1 ? r[idxHoraAten] : '');
-                    dtAtenObj = dtAten;
+                    const dtAten = dtAtenObj;
 
                     if (dtReg && dtAten) {
                         const diff = (dtAten.getTime() - dtReg.getTime()) / (1000 * 60);
@@ -1534,8 +1828,23 @@
                     }
                 }
 
+                let turno = 'SIN HORA';
+                if (idxHoraAten !== -1 && r[idxHoraAten]) {
+                    const hStr = String(r[idxHoraAten]).trim();
+                    const hMatch = hStr.match(/^(\d{1,2})/);
+                    if (hMatch) {
+                        let hNum = parseInt(hMatch[1], 10);
+                        if (hStr.toLowerCase().includes('p') && hNum < 12) hNum += 12;
+                        if (hStr.toLowerCase().includes('a') && hNum === 12) hNum = 0;
+                        turno = getTurnoFromHour(hNum);
+                    }
+                }
+                if (turno === 'SIN HORA' && dtAtenObj) {
+                    turno = getTurnoFromHour(dtAtenObj.getHours());
+                }
+
                 const itemActual = {
-                    actoMed, est, topic, doctor, diagLabel, monthIdx, prio, diffMin: calcDiff,
+                    actoMed, est, topic, doctor, diagLabel, monthIdx, prio, diffMin: calcDiff, turno,
                     timeKey: dtAtenObj ? dtAtenObj.getTime() : 0,
                     esObservacion: topic.includes('OBSERVACION')
                 };
