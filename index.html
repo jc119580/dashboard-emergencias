@@ -348,6 +348,120 @@
 
         </div>
 
+        <!-- SALA SITUACIONAL DE ALERTA SANITARIA: MONITOREO DE DENGUE Y FEBRILES -->
+        <div class="bg-white rounded-xl border-2 border-rose-200 shadow-md overflow-hidden">
+            <div class="p-4 sm:p-5 bg-gradient-to-r from-rose-900 via-red-900 to-slate-900 text-white flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-rose-500 text-white rounded-full animate-pulse">Alerta Sanitaria</span>
+                        <h3 class="font-bold text-base sm:text-lg flex items-center gap-2">
+                            <span>Sala Situacional: Radar de Dengue y Síndromes Febriles</span>
+                        </h3>
+                    </div>
+                    <p class="text-xs text-rose-100 mt-1">
+                        Vigilancia activa de Dengue (<span class="font-semibold text-amber-300">A97.0 / A97.1 / A97.2</span>) y Febriles sospechosos (<span class="font-semibold text-cyan-300">R50.9</span> + síntomas compatibles con Dengue <span class="font-semibold text-cyan-300">R53 / R51 / R10.4</span>)
+                    </p>
+                </div>
+                <div class="no-print flex flex-wrap items-center gap-2">
+                    <select id="dengueCurveDays" class="bg-slate-900/90 text-white text-xs border border-rose-400/40 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-400">
+                        <option value="30">Curva Últimos 30 Días</option>
+                        <option value="14">Curva Últimos 14 Días</option>
+                        <option value="60">Curva Últimos 60 Días</option>
+                    </select>
+                    <button id="btnExportDengue" class="px-3 py-1.5 text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg transition-colors flex items-center gap-1.5 shadow">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                        <span>Reporte Dengue Excel</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 4 KPIs de Vigilancia Epidemiológica -->
+            <div class="p-4 sm:p-5 bg-rose-50/30 border-b border-rose-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-3.5 rounded-xl border border-rose-200 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-rose-700 uppercase">Total Sindrómicos Febriles</span>
+                        <span class="p-1.5 bg-rose-100 text-rose-700 rounded-lg"><i data-lucide="thermometer" class="w-4 h-4"></i></span>
+                    </div>
+                    <div class="mt-1.5 flex items-baseline gap-2">
+                        <h4 id="kpiDengueTotalVigilancia" class="text-2xl font-bold text-slate-900">0</h4>
+                        <span id="kpiDenguePctGlobal" class="text-xs font-semibold text-rose-600">0.0% del total</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-1">Suma A97.x + R50.9 (Fiebre no esp.)</p>
+                </div>
+
+                <div class="bg-white p-3.5 rounded-xl border border-amber-200 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-amber-800 uppercase">Codificados Dengue (A97)</span>
+                        <span class="p-1.5 bg-amber-100 text-amber-700 rounded-lg"><i data-lucide="bug" class="w-4 h-4"></i></span>
+                    </div>
+                    <div class="mt-1.5 flex items-baseline gap-2">
+                        <h4 id="kpiDengueA97" class="text-2xl font-bold text-amber-900">0</h4>
+                        <span id="kpiDengueR509Only" class="text-xs font-semibold text-slate-600">vs. 0 R50.9</span>
+                    </div>
+                    <p id="kpiDengueSubregistro" class="text-[11px] text-amber-700 font-medium mt-1">Ratio R50.9/A97: -</p>
+                </div>
+
+                <div class="bg-white p-3.5 rounded-xl border border-indigo-200 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-indigo-800 uppercase">Síntomas Compatibles con Dengue</span>
+                        <span class="p-1.5 bg-indigo-100 text-indigo-700 rounded-lg"><i data-lucide="activity" class="w-4 h-4"></i></span>
+                    </div>
+                    <div class="mt-1.5 flex items-baseline gap-2">
+                        <h4 id="kpiDengueSatelites" class="text-2xl font-bold text-indigo-950">0</h4>
+                        <span class="text-xs text-slate-500">atenciones</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-1">R53 Fatiga + R51 Cefalea + R10.4 Abd.</p>
+                </div>
+
+                <div class="bg-white p-3.5 rounded-xl border border-red-300 bg-red-50/40 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-red-800 uppercase">Casos Críticos / Observación</span>
+                        <span class="p-1.5 bg-red-100 text-red-700 rounded-lg"><i data-lucide="siren" class="w-4 h-4"></i></span>
+                    </div>
+                    <div class="mt-1.5 flex items-baseline gap-2">
+                        <h4 id="kpiDengueCriticos" class="text-2xl font-bold text-red-900">0</h4>
+                        <span id="kpiDengueCriticosPct" class="text-xs font-semibold text-red-700">0.0%</span>
+                    </div>
+                    <p class="text-[11px] text-red-700 mt-1">Febriles P1/P2 o en Sala Observación</p>
+                </div>
+            </div>
+
+            <!-- Curva Epidémica Diaria + Mapa de Calor por IPRESS de Procedencia -->
+            <div class="p-5 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 flex flex-col">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <h4 class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1.5">
+                            <i data-lucide="line-chart" class="w-4 h-4 text-rose-600"></i>
+                            Curva Epidémica Diaria de Casos Febriles y Dengue (FECHA_ATEN)
+                        </h4>
+                        <span id="lblDenguePromedioDiario" class="text-[11px] font-semibold bg-rose-50 text-rose-800 border border-rose-200 px-2.5 py-0.5 rounded-full">
+                            Promedio: 0.0 casos/día
+                        </span>
+                    </div>
+                    <div class="h-64 relative chart-container">
+                        <canvas id="chartDengueDiario"></canvas>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-1 flex flex-col justify-between bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1.5 mb-1">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-rose-600"></i>
+                            Focos por IPRESS de Adscripción
+                        </h4>
+                        <p class="text-[11px] text-slate-500 mb-3">Top procedencia de febriles (R50.9 + A97.x)</p>
+                        <ul id="listDengueIpress" class="space-y-2 text-xs">
+                            <li class="text-slate-400 text-center py-4">Calculando focos...</li>
+                        </ul>
+                    </div>
+                    <div class="mt-3 pt-2.5 border-t border-slate-200 text-[11px] text-slate-600 flex items-center justify-between">
+                        <span>Turno pico febriles:</span>
+                        <strong id="lblDengueTurnoPico" class="text-rose-700">-</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- SECCIÓN OFICIAL GCOP: TIEMPO DE ATENCIÓN EN TÓPICO -->
         <div class="bg-white rounded-xl border border-blue-200 shadow-md overflow-hidden">
             <div class="p-5 bg-gradient-to-r from-blue-900 to-indigo-900 text-white flex flex-wrap items-center justify-between gap-4">
@@ -634,14 +748,15 @@
         let rawRecordsData = [];
         let globalSeenActos = new Set();
         let evalViewMode = 'TOPICO';
-        let chartTrend, chartPrioridad, chartEstablecimientos, chartTopicos, chartMedicos, chartDiagnosticos, chartTurnos;
+        let chartTrend, chartPrioridad, chartEstablecimientos, chartTopicos, chartMedicos, chartDiagnosticos, chartTurnos, chartDengueDiario;
         let lastTurnoDiagExportData = [];
+        let lastDengueExportData = [];
         let currentPage = 1;
         const pageSize = 8;
         let activeUser = null;
 
         const DB_NAME = 'AlbrechtEmergenciasDB';
-        const DB_VERSION = 2;
+        const DB_VERSION = 3;
 
         function openIndexedDB() {
             return new Promise((resolve, reject) => {
@@ -702,7 +817,7 @@
         }
 
         function prepararGraficosParaImpresion() {
-            const charts = [chartTrend, chartPrioridad, chartEstablecimientos, chartTopicos, chartMedicos, chartDiagnosticos, chartTurnos];
+            const charts = [chartTrend, chartPrioridad, chartEstablecimientos, chartTopicos, chartMedicos, chartDiagnosticos, chartTurnos, chartDengueDiario];
             charts.forEach(chart => {
                 if (!chart || !chart.canvas) return;
                 const canvas = chart.canvas;
@@ -794,6 +909,8 @@
             document.getElementById('turnoDiagTopLimit').addEventListener('change', renderTurnoStats);
             document.getElementById('turnoDiagSearch').addEventListener('input', renderTurnoStats);
             document.getElementById('btnExportTurnos').addEventListener('click', exportTurnosToExcel);
+            document.getElementById('dengueCurveDays').addEventListener('change', renderDengueRadar);
+            document.getElementById('btnExportDengue').addEventListener('click', exportDengueToExcel);
             document.getElementById('resetFilters').addEventListener('click', resetFilters);
             document.getElementById('tableSearch').addEventListener('input', () => { currentPage = 1; renderTable(); });
             document.getElementById('btnPrev').addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
@@ -1016,6 +1133,8 @@
             const selectMes = document.getElementById('filterMes');
             selectMes.innerHTML = '<option value="ALL">Todos los Meses</option>';
             MONTHS.forEach((m, idx) => selectMes.add(new Option(m, idx)));
+            const currentMonthIdx = new Date().getMonth();
+            selectMes.value = String(currentMonthIdx);
         }
 
         function getActiveIPRESS() {
@@ -1330,6 +1449,166 @@
             XLSX.writeFile(wb, "Estadistica_Turnos_Diagnosticos_Emergencia.xlsx");
         }
 
+        function classifyDengueCode(diagLabel) {
+            const up = String(diagLabel || '').toUpperCase();
+            const codePart = up.split('-')[0].trim();
+            if (codePart.startsWith('A97')) return 'A97';
+            if (codePart.startsWith('R50')) return 'R509';
+            if (codePart.startsWith('R53') || codePart.startsWith('R51') || codePart.startsWith('R10.4') || codePart.startsWith('R104')) return 'SATELITE';
+            return 'OTRO';
+        }
+
+        function renderDengueRadar() {
+            const activeIPRESS = getActiveIPRESS();
+            const selectTopic = document.getElementById('filterTopico').value;
+            const mesVal = document.getElementById('filterMes').value;
+            const turnoVal = document.getElementById('filterTurno').value;
+            const curveDays = parseInt(document.getElementById('dengueCurveDays').value, 10) || 30;
+
+            let totalEvaluados = 0;
+            let countA97 = 0;
+            let countR509 = 0;
+            let countSatelites = 0;
+            let countCriticos = 0;
+
+            const ipressFebrilMap = {};
+            const turnoFebrilMap = { 'MAÑANA': 0, 'TARDE': 0, 'NOCHE': 0 };
+            const dailyMap = {};
+            let maxTimestamp = 0;
+
+            rawRecordsData.forEach(r => {
+                if (r.timeKey && r.timeKey > maxTimestamp) maxTimestamp = r.timeKey;
+            });
+
+            // Build daily map across all records matching IPRESS/Topic/Turno (independent of filterMes so curve shows trailing N days)
+            rawRecordsData.forEach(r => {
+                const matchEst = (activeIPRESS === 'ALL') || (r.est === activeIPRESS);
+                const matchTop = (selectTopic === 'ALL') || (r.topic === selectTopic);
+                const rTurno = getRecordTurno(r);
+                const matchTurno = (turnoVal === 'ALL') || (rTurno === turnoVal);
+
+                if (!matchEst || !matchTop || !matchTurno) return;
+
+                const cat = classifyDengueCode(r.diagLabel);
+                let ymd = r.dateYMD;
+                if (!ymd && r.timeKey) {
+                    const d = new Date(r.timeKey);
+                    if (!isNaN(d.getTime())) {
+                        ymd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    }
+                }
+                if (ymd && (cat === 'A97' || cat === 'R509')) {
+                    if (!dailyMap[ymd]) dailyMap[ymd] = { date: ymd, a97: 0, r509: 0, total: 0 };
+                    if (cat === 'A97') dailyMap[ymd].a97++;
+                    if (cat === 'R509') dailyMap[ymd].r509++;
+                    dailyMap[ymd].total++;
+                }
+
+                // KPI & IPRESS breakdown respects filterMes
+                const matchMes = (mesVal === 'ALL') || (r.monthIdx === parseInt(mesVal));
+                if (!matchMes) return;
+
+                totalEvaluados++;
+                if (cat === 'A97') countA97++;
+                else if (cat === 'R509') countR509++;
+                else if (cat === 'SATELITE') countSatelites++;
+
+                if (cat === 'A97' || cat === 'R509') {
+                    const estName = r.est || 'NO ESPECIFICADO';
+                    ipressFebrilMap[estName] = (ipressFebrilMap[estName] || 0) + 1;
+                    if (turnoFebrilMap[rTurno] !== undefined) turnoFebrilMap[rTurno]++;
+
+                    const isCrit = (r.prio === 'P1' || r.prio === 'P2' || r.esObservacion || String(r.topic).includes('SHOCK') || String(r.topic).includes('OBSERVACION'));
+                    if (isCrit) countCriticos++;
+                }
+            });
+
+            const totalVigilancia = countA97 + countR509;
+            const pctGlobal = totalEvaluados > 0 ? ((totalVigilancia / totalEvaluados) * 100).toFixed(1) : '0.0';
+            const pctCrit = totalVigilancia > 0 ? ((countCriticos / totalVigilancia) * 100).toFixed(1) : '0.0';
+
+            document.getElementById('kpiDengueTotalVigilancia').innerText = totalVigilancia.toLocaleString('es-PE');
+            document.getElementById('kpiDenguePctGlobal').innerText = `${pctGlobal}% del total`;
+            document.getElementById('kpiDengueA97').innerText = countA97.toLocaleString('es-PE');
+            document.getElementById('kpiDengueR509Only').innerText = `vs. ${countR509.toLocaleString('es-PE')} R50.9`;
+            document.getElementById('kpiDengueSubregistro').innerText = countA97 > 0
+                ? `Ratio R50.9 / A97: ${(countR509 / countA97).toFixed(1)}x`
+                : `100% registrado como R50.9 (0 A97)`;
+            document.getElementById('kpiDengueSatelites').innerText = countSatelites.toLocaleString('es-PE');
+            document.getElementById('kpiDengueCriticos').innerText = countCriticos.toLocaleString('es-PE');
+            document.getElementById('kpiDengueCriticosPct').innerText = `${pctCrit}% de febriles`;
+
+            // Top Turno Febril
+            const topTurnoEntry = Object.entries(turnoFebrilMap).sort((a, b) => b[1] - a[1])[0];
+            document.getElementById('lblDengueTurnoPico').innerText = (topTurnoEntry && topTurnoEntry[1] > 0)
+                ? `${topTurnoEntry[0]} (${topTurnoEntry[1].toLocaleString('es-PE')} casos)`
+                : '-';
+
+            // Top 5 IPRESS de procedencia de febriles
+            const ulIpress = document.getElementById('listDengueIpress');
+            const sortedIpress = Object.entries(ipressFebrilMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            ulIpress.innerHTML = '';
+            if (sortedIpress.length === 0) {
+                ulIpress.innerHTML = '<li class="text-slate-400 text-center py-4">Sin casos febriles registrados</li>';
+            } else {
+                const maxIp = sortedIpress[0][1] || 1;
+                sortedIpress.forEach(([estName, cnt], idx) => {
+                    const pctIp = totalVigilancia > 0 ? ((cnt / totalVigilancia) * 100).toFixed(1) : '0.0';
+                    const barW = Math.max(8, Math.round((cnt / maxIp) * 100));
+                    const li = document.createElement('li');
+                    li.className = "bg-white p-2 rounded-lg border border-slate-200/80 shadow-2xs";
+                    li.innerHTML = `
+                        <div class="flex items-center justify-between text-[11px] mb-1">
+                            <span class="font-semibold text-slate-800 truncate max-w-[175px]" title="${estName}">${idx + 1}. ${estName}</span>
+                            <span class="font-bold text-rose-700">${cnt.toLocaleString('es-PE')} <span class="text-[10px] text-slate-400 font-normal">(${pctIp}%)</span></span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-1.5">
+                            <div class="bg-rose-600 h-1.5 rounded-full" style="width: ${barW}%"></div>
+                        </div>
+                    `;
+                    ulIpress.appendChild(li);
+                });
+            }
+
+            // Daily curve (last N days sorted chronologically)
+            const sortedDays = Object.values(dailyMap).sort((a, b) => a.date.localeCompare(b.date));
+            const recentDays = sortedDays.slice(-curveDays);
+            lastDengueExportData = sortedDays;
+
+            const sumRecent = recentDays.reduce((acc, d) => acc + d.total, 0);
+            const avgDaily = recentDays.length > 0 ? (sumRecent / recentDays.length).toFixed(1) : '0.0';
+            document.getElementById('lblDenguePromedioDiario').innerText = `Promedio (${recentDays.length}d): ${avgDaily} casos/día`;
+
+            if (chartDengueDiario) {
+                chartDengueDiario.data.labels = recentDays.map(d => {
+                    const parts = d.date.split('-');
+                    return parts.length === 3 ? `${parts[2]}/${parts[1]}` : d.date;
+                });
+                chartDengueDiario.data.datasets[0].data = recentDays.map(d => d.a97);
+                chartDengueDiario.data.datasets[1].data = recentDays.map(d => d.r509);
+                chartDengueDiario.update();
+            }
+        }
+
+        function exportDengueToExcel() {
+            if (!lastDengueExportData || lastDengueExportData.length === 0) {
+                alert("No hay datos diarios de febriles/dengue para exportar.");
+                return;
+            }
+            const wsData = [
+                ["FECHA ATENCIÓN", "DENGUE CODIFICADO (A97.x)", "FIEBRE NO ESPECIFICADA (R50.9)", "TOTAL VIGILANCIA FEBRIL"]
+            ];
+            lastDengueExportData.forEach(d => {
+                wsData.push([d.date, d.a97, d.r509, d.total]);
+            });
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            ws['!cols'] = [{ wch: 18 }, { wch: 26 }, { wch: 30 }, { wch: 24 }];
+            XLSX.utils.book_append_sheet(wb, ws, "Curva_Diaria_Febriles");
+            XLSX.writeFile(wb, "Sala_Situacional_Dengue_Febriles_Albrecht.xlsx");
+        }
+
+
 
         function updateDashboard() {
             const filtered = getFilteredData();
@@ -1408,6 +1687,7 @@
             renderTable();
             renderEvalTable();
             renderTurnoStats();
+            renderDengueRadar();
         }
 
         function initCharts() {
@@ -1577,6 +1857,54 @@
                     scales: { y: { beginAtZero: true } }
                 }
             });
+
+            const ctxDengue = document.getElementById('chartDengueDiario').getContext('2d');
+            chartDengueDiario = new Chart(ctxDengue, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Dengue (A97.x)',
+                            data: [],
+                            backgroundColor: '#d97706',
+                            borderRadius: 4,
+                            stack: 'stack0'
+                        },
+                        {
+                            label: 'Fiebre No Esp. (R50.9)',
+                            data: [],
+                            backgroundColor: '#e11d48',
+                            borderRadius: 4,
+                            stack: 'stack0'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: { top: 18 } },
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
+                        datalabels: {
+                            display: (ctx) => ctx.dataset.data[ctx.dataIndex] > 0 && ctx.datasetIndex === 1,
+                            anchor: 'end',
+                            align: 'top',
+                            offset: 2,
+                            color: '#881337',
+                            font: { weight: 'bold', size: 9 },
+                            formatter: (val, ctx) => {
+                                const a97 = ctx.chart.data.datasets[0].data[ctx.dataIndex] || 0;
+                                return (val + a97).toLocaleString('es-PE');
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true, ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 0 } },
+                        y: { stacked: true, beginAtZero: true }
+                    }
+                }
+            });
         }
 
         function updateCharts(monthlyTotals, estMap, topicMap, docMap, topDiagsList, grandTotal) {
@@ -1681,7 +2009,7 @@
             document.getElementById('searchEstablecimiento').value = '';
             document.getElementById('filterEstablecimiento').value = 'ALL';
             document.getElementById('filterTopico').value = 'ALL';
-            document.getElementById('filterMes').value = 'ALL';
+            document.getElementById('filterMes').value = String(new Date().getMonth());
             document.getElementById('filterTurno').value = 'ALL';
             document.getElementById('tableSearch').value = '';
             const tSearch = document.getElementById('turnoDiagSearch');
@@ -1843,8 +2171,16 @@
                     turno = getTurnoFromHour(dtAtenObj.getHours());
                 }
 
+                let dateYMD = '';
+                if (dtAtenObj && !isNaN(dtAtenObj.getTime())) {
+                    const y = dtAtenObj.getFullYear();
+                    const mo = String(dtAtenObj.getMonth() + 1).padStart(2, '0');
+                    const da = String(dtAtenObj.getDate()).padStart(2, '0');
+                    dateYMD = `${y}-${mo}-${da}`;
+                }
+
                 const itemActual = {
-                    actoMed, est, topic, doctor, diagLabel, monthIdx, prio, diffMin: calcDiff, turno,
+                    actoMed, est, topic, doctor, diagLabel, monthIdx, prio, diffMin: calcDiff, turno, dateYMD,
                     timeKey: dtAtenObj ? dtAtenObj.getTime() : 0,
                     esObservacion: topic.includes('OBSERVACION')
                 };
