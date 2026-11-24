@@ -255,9 +255,9 @@
 
                 <select id="filterTurno" class="bg-blue-50 border border-blue-300 text-blue-900 font-medium text-xs sm:text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     <option value="ALL">🕒 Todos los Turnos</option>
-                    <option value="MAÑANA">☀️ Mañana (07:00 - 13:59)</option>
+                    <option value="MAÑANA">☀️ Mañana (08:00 - 13:59)</option>
                     <option value="TARDE">🌤️ Tarde (14:00 - 19:59)</option>
-                    <option value="NOCHE">🌙 Noche (20:00 - 06:59)</option>
+                    <option value="NOCHE">🌙 Guardia Noche (20:00 - 07:59)</option>
                 </select>
             </div>
 
@@ -364,9 +364,11 @@
                 </div>
                 <div class="no-print flex flex-wrap items-center gap-2">
                     <select id="dengueCurveDays" class="bg-slate-900/90 text-white text-xs border border-rose-400/40 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-400">
+                        <option value="FILTER">Curva Según Filtro de Mes</option>
                         <option value="30">Curva Últimos 30 Días</option>
-                        <option value="14">Curva Últimos 14 Días</option>
                         <option value="60">Curva Últimos 60 Días</option>
+                        <option value="90">Curva Últimos 90 Días</option>
+                        <option value="ALL">Curva Todo el Año (Ene - Dic)</option>
                     </select>
                     <button id="btnExportDengue" class="px-3 py-1.5 text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg transition-colors flex items-center gap-1.5 shadow">
                         <i data-lucide="download" class="w-3.5 h-3.5"></i>
@@ -398,7 +400,11 @@
                         <h4 id="kpiDengueA97" class="text-2xl font-bold text-amber-900">0</h4>
                         <span id="kpiDengueR509Only" class="text-xs font-semibold text-slate-600">vs. 0 R50.9</span>
                     </div>
-                    <p id="kpiDengueSubregistro" class="text-[11px] text-amber-700 font-medium mt-1">Ratio R50.9/A97: -</p>
+                    <div class="mt-1.5 flex flex-wrap gap-1.5 text-[10px] font-semibold">
+                        <span id="kpiDengueSinSignos" class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">Sin alarma (A97.0): 0</span>
+                        <span id="kpiDengueConSignos" class="px-1.5 py-0.5 rounded bg-rose-50 text-rose-800 border border-rose-200">Con alarma (A97.1): 0</span>
+                    </div>
+                    <p id="kpiDengueSubregistro" class="text-[10px] text-amber-700 font-medium mt-1">Grave/No esp.: 0 | Ratio R50.9/A97: -</p>
                 </div>
 
                 <div class="bg-white p-3.5 rounded-xl border border-indigo-200 shadow-sm">
@@ -457,6 +463,79 @@
                     <div class="mt-3 pt-2.5 border-t border-slate-200 text-[11px] text-slate-600 flex items-center justify-between">
                         <span>Turno pico febriles:</span>
                         <strong id="lblDengueTurnoPico" class="text-rose-700">-</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN ESTADÍSTICA POR TURNOS (MAÑANA, TARDE Y NOCHE) Y DIAGNÓSTICOS -->
+        <div class="bg-white rounded-xl border border-indigo-200 shadow-md overflow-hidden">
+            <div class="p-5 bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <h3 class="font-bold text-base sm:text-lg flex items-center gap-2">
+                        <i data-lucide="clock-3" class="w-5 h-5 text-cyan-400"></i>
+                        <span>Atenciones por Turnos (Mañana, Tarde y Noche) y Perfil Diagnóstico</span>
+                    </h3>
+                    <p class="text-xs text-slate-300 mt-0.5">
+                        Mañana: <span class="text-amber-300 font-semibold">08:00 - 13:59</span> |
+                        Tarde: <span class="text-cyan-300 font-semibold">14:00 - 19:59</span> |
+                        Guardia Noche: <span class="text-indigo-300 font-semibold">20:00 - 07:59</span>
+                    </p>
+                </div>
+                <div class="no-print flex items-center gap-2">
+                    <select id="turnoDiagTopLimit" class="bg-slate-800 text-white text-xs border border-slate-600 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                        <option value="10">Top 10 Diagnósticos</option>
+                        <option value="15">Top 15 Diagnósticos</option>
+                        <option value="25">Top 25 Diagnósticos</option>
+                        <option value="ALL">Todos los Diagnósticos</option>
+                    </select>
+                    <button id="btnExportTurnos" class="px-3 py-1.5 text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg transition-colors flex items-center gap-1.5 shadow">
+                        <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+                        <span>Exportar Excel</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-5 grid grid-cols-1 lg:grid-cols-3 gap-6 border-b border-slate-100">
+                <!-- Gráfico de Distribución por Turno -->
+                <div class="lg:col-span-1 flex flex-col justify-between bg-slate-50/70 p-4 rounded-xl border border-slate-200/80">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1.5">
+                            <i data-lucide="bar-chart-2" class="w-4 h-4 text-blue-600"></i>
+                            Total Atenciones por Turno
+                        </h4>
+                    </div>
+                    <div class="h-56 relative chart-container">
+                        <canvas id="chartTurnos"></canvas>
+                    </div>
+                    <div id="turnoCardsSummary" class="grid grid-cols-3 gap-2 mt-3 text-center"></div>
+                </div>
+
+                <!-- Tabla Cruzada: Diagnósticos por Turno -->
+                <div class="lg:col-span-2 flex flex-col">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <h4 class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1.5">
+                            <i data-lucide="table" class="w-4 h-4 text-indigo-600"></i>
+                            Matriz de Diagnósticos CIE-10 por Turno Asistencial
+                        </h4>
+                        <input type="text" id="turnoDiagSearch" placeholder="🔍 Filtrar código CIE-10 o diagnóstico..." class="no-print bg-slate-50 border border-slate-300 text-slate-700 text-xs rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none w-full sm:w-64">
+                    </div>
+                    <div class="overflow-x-auto overflow-y-auto max-h-72 border border-slate-200 rounded-lg">
+                        <table class="w-full text-xs text-left text-slate-600">
+                            <thead class="bg-slate-100 text-slate-700 font-semibold uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
+                                <tr>
+                                    <th class="py-2.5 px-3">Código CIE-10 + Diagnóstico</th>
+                                    <th class="py-2.5 px-2.5 text-right text-amber-800 bg-amber-50/80">☀️ Mañana</th>
+                                    <th class="py-2.5 px-2.5 text-right text-cyan-800 bg-cyan-50/80">🌤️ Tarde</th>
+                                    <th class="py-2.5 px-2.5 text-right text-indigo-900 bg-indigo-50/80">🌙 Noche</th>
+                                    <th class="py-2.5 px-3 text-right font-bold text-blue-950 bg-slate-200/80">Total</th>
+                                    <th class="py-2.5 px-2.5 text-right">% Part.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="turnoDiagTableBody" class="divide-y divide-slate-100">
+                                <tr><td colspan="6" class="text-center py-6 text-slate-400">Cargando estadísticas por turno...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -562,79 +641,6 @@
                     </h3>
                     <div class="overflow-y-auto max-h-60 pr-1">
                         <ul id="listDiagnosticos" class="space-y-2 text-xs"></ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SECCIÓN ESTADÍSTICA POR TURNOS (MAÑANA, TARDE Y NOCHE) Y DIAGNÓSTICOS -->
-        <div class="bg-white rounded-xl border border-indigo-200 shadow-md overflow-hidden">
-            <div class="p-5 bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white flex flex-wrap items-center justify-between gap-4">
-                <div>
-                    <h3 class="font-bold text-base sm:text-lg flex items-center gap-2">
-                        <i data-lucide="clock-3" class="w-5 h-5 text-cyan-400"></i>
-                        <span>Atenciones por Turnos (Mañana, Tarde y Noche) y Perfil Diagnóstico</span>
-                    </h3>
-                    <p class="text-xs text-slate-300 mt-0.5">
-                        Mañana: <span class="text-amber-300 font-semibold">07:00 - 13:59</span> |
-                        Tarde: <span class="text-cyan-300 font-semibold">14:00 - 19:59</span> |
-                        Noche: <span class="text-indigo-300 font-semibold">20:00 - 06:59</span>
-                    </p>
-                </div>
-                <div class="no-print flex items-center gap-2">
-                    <select id="turnoDiagTopLimit" class="bg-slate-800 text-white text-xs border border-slate-600 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                        <option value="10">Top 10 Diagnósticos</option>
-                        <option value="15">Top 15 Diagnósticos</option>
-                        <option value="25">Top 25 Diagnósticos</option>
-                        <option value="ALL">Todos los Diagnósticos</option>
-                    </select>
-                    <button id="btnExportTurnos" class="px-3 py-1.5 text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg transition-colors flex items-center gap-1.5 shadow">
-                        <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
-                        <span>Exportar Excel</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="p-5 grid grid-cols-1 lg:grid-cols-3 gap-6 border-b border-slate-100">
-                <!-- Gráfico de Distribución por Turno -->
-                <div class="lg:col-span-1 flex flex-col justify-between bg-slate-50/70 p-4 rounded-xl border border-slate-200/80">
-                    <div class="flex items-center justify-between mb-2">
-                        <h4 class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1.5">
-                            <i data-lucide="bar-chart-2" class="w-4 h-4 text-blue-600"></i>
-                            Total Atenciones por Turno
-                        </h4>
-                    </div>
-                    <div class="h-56 relative chart-container">
-                        <canvas id="chartTurnos"></canvas>
-                    </div>
-                    <div id="turnoCardsSummary" class="grid grid-cols-3 gap-2 mt-3 text-center"></div>
-                </div>
-
-                <!-- Tabla Cruzada: Diagnósticos por Turno -->
-                <div class="lg:col-span-2 flex flex-col">
-                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                        <h4 class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1.5">
-                            <i data-lucide="table" class="w-4 h-4 text-indigo-600"></i>
-                            Matriz de Diagnósticos CIE-10 por Turno Asistencial
-                        </h4>
-                        <input type="text" id="turnoDiagSearch" placeholder="🔍 Filtrar código CIE-10 o diagnóstico..." class="no-print bg-slate-50 border border-slate-300 text-slate-700 text-xs rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:outline-none w-full sm:w-64">
-                    </div>
-                    <div class="overflow-x-auto overflow-y-auto max-h-72 border border-slate-200 rounded-lg">
-                        <table class="w-full text-xs text-left text-slate-600">
-                            <thead class="bg-slate-100 text-slate-700 font-semibold uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
-                                <tr>
-                                    <th class="py-2.5 px-3">Código CIE-10 + Diagnóstico</th>
-                                    <th class="py-2.5 px-2.5 text-right text-amber-800 bg-amber-50/80">☀️ Mañana</th>
-                                    <th class="py-2.5 px-2.5 text-right text-cyan-800 bg-cyan-50/80">🌤️ Tarde</th>
-                                    <th class="py-2.5 px-2.5 text-right text-indigo-900 bg-indigo-50/80">🌙 Noche</th>
-                                    <th class="py-2.5 px-3 text-right font-bold text-blue-950 bg-slate-200/80">Total</th>
-                                    <th class="py-2.5 px-2.5 text-right">% Part.</th>
-                                </tr>
-                            </thead>
-                            <tbody id="turnoDiagTableBody" class="divide-y divide-slate-100">
-                                <tr><td colspan="6" class="text-center py-6 text-slate-400">Cargando estadísticas por turno...</td></tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
@@ -746,7 +752,7 @@
 
         let currentData = [];
         let rawRecordsData = [];
-        let globalSeenActos = new Set();
+        let globalMapaActos = new Map();
         let evalViewMode = 'TOPICO';
         let chartTrend, chartPrioridad, chartEstablecimientos, chartTopicos, chartMedicos, chartDiagnosticos, chartTurnos, chartDengueDiario;
         let lastTurnoDiagExportData = [];
@@ -756,7 +762,7 @@
         let activeUser = null;
 
         const DB_NAME = 'AlbrechtEmergenciasDB';
-        const DB_VERSION = 3;
+        const DB_VERSION = 7;
 
         function openIndexedDB() {
             return new Promise((resolve, reject) => {
@@ -972,7 +978,7 @@
                 loadingBar.innerText = "Descargando y consolidando archivos de emergencias...";
                 currentData = [];
                 rawRecordsData = [];
-                globalSeenActos.clear();
+                globalMapaActos.clear();
 
                 const monthFiles = [
                     'mes_01.txt', 'mes_02.txt', 'mes_03.txt', 'mes_04.txt',
@@ -991,7 +997,7 @@
                 const textResults = await Promise.all(fetchPromises);
                 let totalProcesados = 0;
 
-                textResults.forEach(text => {
+                textResults.forEach((text, fIdx) => {
                     if (!text) return;
                     const lines = text.split(/\r\n|\n/);
                     if (lines.length > 1) {
@@ -1000,9 +1006,10 @@
                         else if (lines[0].includes(';')) delim = ';';
                         else if (lines[0].includes(',')) delim = ',';
                         const rows = lines.map(line => line.split(delim).map(c => c.trim()));
-                        totalProcesados += parseExcelToSummary(rows);
+                        collectRowsIntoActoMap(rows, `M${fIdx + 1}`);
                     }
                 });
+                totalProcesados = finalizeActoMapToDashboard();
 
                 if (totalProcesados > 0) {
                     await setIDBValue('cached_version', serverDate);
@@ -1133,8 +1140,7 @@
             const selectMes = document.getElementById('filterMes');
             selectMes.innerHTML = '<option value="ALL">Todos los Meses</option>';
             MONTHS.forEach((m, idx) => selectMes.add(new Option(m, idx)));
-            const currentMonthIdx = new Date().getMonth();
-            selectMes.value = String(currentMonthIdx);
+            selectMes.value = String(new Date().getMonth());
         }
 
         function getActiveIPRESS() {
@@ -1154,9 +1160,9 @@
 
         function getTurnoFromHour(hourNum) {
             if (isNaN(hourNum) || hourNum === null || hourNum === undefined) return 'SIN HORA';
-            if (hourNum >= 7 && hourNum < 14) return 'MAÑANA';
+            if (hourNum >= 8 && hourNum < 14) return 'MAÑANA';
             if (hourNum >= 14 && hourNum < 20) return 'TARDE';
-            return 'NOCHE';
+            return 'NOCHE'; // 20:00 a 07:59 (Guardia Nocturna)
         }
 
         function getRecordTurno(r) {
@@ -1436,7 +1442,7 @@
             }
             const totalGeneral = lastTurnoDiagExportData.reduce((acc, r) => acc + r.total, 0);
             const wsData = [
-                ["N°", "CÓDIGO CIE-10 + DIAGNÓSTICO", "TURNO MAÑANA (07:00-13:59)", "TURNO TARDE (14:00-19:59)", "TURNO NOCHE (20:00-06:59)", "TOTAL ATENCIONES", "% PARTICIPACIÓN"]
+                ["N°", "CÓDIGO CIE-10 + DIAGNÓSTICO", "TURNO MAÑANA (08:00-13:59)", "TURNO TARDE (14:00-19:59)", "GUARDIA NOCHE (20:00-07:59)", "TOTAL ATENCIONES", "% PARTICIPACIÓN"]
             ];
             lastTurnoDiagExportData.forEach((item, i) => {
                 const pct = totalGeneral > 0 ? ((item.total / totalGeneral) * 100).toFixed(2) + '%' : '0.00%';
@@ -1447,6 +1453,16 @@
             ws['!cols'] = [{ wch: 6 }, { wch: 52 }, { wch: 24 }, { wch: 24 }, { wch: 24 }, { wch: 18 }, { wch: 16 }];
             XLSX.utils.book_append_sheet(wb, ws, "Turnos_Diagnosticos");
             XLSX.writeFile(wb, "Estadistica_Turnos_Diagnosticos_Emergencia.xlsx");
+        }
+
+        function classifyDengueSubtype(diagLabel) {
+            const up = String(diagLabel || '').toUpperCase();
+            const codePart = up.split('-')[0].trim().replace('.', '');
+            if (codePart === 'A970' || up.includes('SIN SIGNOS DE ALARMA')) return 'A970';
+            if (codePart === 'A971' || up.includes('CON SIGNOS DE ALARMA')) return 'A971';
+            if (codePart === 'A972' || up.includes('DENGUE GRAVE')) return 'A972';
+            if (codePart.startsWith('A97')) return 'A979';
+            return null;
         }
 
         function classifyDengueCode(diagLabel) {
@@ -1463,10 +1479,14 @@
             const selectTopic = document.getElementById('filterTopico').value;
             const mesVal = document.getElementById('filterMes').value;
             const turnoVal = document.getElementById('filterTurno').value;
-            const curveDays = parseInt(document.getElementById('dengueCurveDays').value, 10) || 30;
+            const curveVal = document.getElementById('dengueCurveDays').value;
+            const curveDays = (curveVal === 'FILTER' || curveVal === 'ALL') ? 0 : (parseInt(curveVal, 10) || 0);
 
             let totalEvaluados = 0;
             let countA97 = 0;
+            let countA970 = 0;
+            let countA971 = 0;
+            let countA97Otros = 0;
             let countR509 = 0;
             let countSatelites = 0;
             let countCriticos = 0;
@@ -1474,13 +1494,7 @@
             const ipressFebrilMap = {};
             const turnoFebrilMap = { 'MAÑANA': 0, 'TARDE': 0, 'NOCHE': 0 };
             const dailyMap = {};
-            let maxTimestamp = 0;
 
-            rawRecordsData.forEach(r => {
-                if (r.timeKey && r.timeKey > maxTimestamp) maxTimestamp = r.timeKey;
-            });
-
-            // Build daily map across all records matching IPRESS/Topic/Turno (independent of filterMes so curve shows trailing N days)
             rawRecordsData.forEach(r => {
                 const matchEst = (activeIPRESS === 'ALL') || (r.est === activeIPRESS);
                 const matchTop = (selectTopic === 'ALL') || (r.topic === selectTopic);
@@ -1489,27 +1503,42 @@
 
                 if (!matchEst || !matchTop || !matchTurno) return;
 
+                const matchMes = (mesVal === 'ALL') || (r.monthIdx === parseInt(mesVal));
                 const cat = classifyDengueCode(r.diagLabel);
-                let ymd = r.dateYMD;
-                if (!ymd && r.timeKey) {
-                    const d = new Date(r.timeKey);
-                    if (!isNaN(d.getTime())) {
-                        ymd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                const subA97 = (cat === 'A97') ? classifyDengueSubtype(r.diagLabel) : null;
+
+                // Para la curva diaria: si curveVal === 'FILTER', respeta el filtro de mes; si es 30/60/90 o ALL, toma todos los meses para mostrar los últimos N días corridos
+                const includeInCurve = (curveVal === 'FILTER') ? matchMes : true;
+                if (includeInCurve && (cat === 'A97' || cat === 'R509')) {
+                    let ymd = r.dateYMD;
+                    if (!ymd && r.timeKey) {
+                        const d = new Date(r.timeKey);
+                        if (!isNaN(d.getTime())) {
+                            ymd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                        }
+                    }
+                    if (ymd) {
+                        if (!dailyMap[ymd]) dailyMap[ymd] = { date: ymd, a97: 0, a970: 0, a971: 0, a97otros: 0, r509: 0, total: 0 };
+                        if (cat === 'A97') {
+                            dailyMap[ymd].a97++;
+                            if (subA97 === 'A970') dailyMap[ymd].a970++;
+                            else if (subA97 === 'A971') dailyMap[ymd].a971++;
+                            else dailyMap[ymd].a97otros++;
+                        }
+                        if (cat === 'R509') dailyMap[ymd].r509++;
+                        dailyMap[ymd].total++;
                     }
                 }
-                if (ymd && (cat === 'A97' || cat === 'R509')) {
-                    if (!dailyMap[ymd]) dailyMap[ymd] = { date: ymd, a97: 0, r509: 0, total: 0 };
-                    if (cat === 'A97') dailyMap[ymd].a97++;
-                    if (cat === 'R509') dailyMap[ymd].r509++;
-                    dailyMap[ymd].total++;
-                }
 
-                // KPI & IPRESS breakdown respects filterMes
-                const matchMes = (mesVal === 'ALL') || (r.monthIdx === parseInt(mesVal));
                 if (!matchMes) return;
 
                 totalEvaluados++;
-                if (cat === 'A97') countA97++;
+                if (cat === 'A97') {
+                    countA97++;
+                    if (subA97 === 'A970') countA970++;
+                    else if (subA97 === 'A971') countA971++;
+                    else countA97Otros++;
+                }
                 else if (cat === 'R509') countR509++;
                 else if (cat === 'SATELITE') countSatelites++;
 
@@ -1531,9 +1560,10 @@
             document.getElementById('kpiDenguePctGlobal').innerText = `${pctGlobal}% del total`;
             document.getElementById('kpiDengueA97').innerText = countA97.toLocaleString('es-PE');
             document.getElementById('kpiDengueR509Only').innerText = `vs. ${countR509.toLocaleString('es-PE')} R50.9`;
-            document.getElementById('kpiDengueSubregistro').innerText = countA97 > 0
-                ? `Ratio R50.9 / A97: ${(countR509 / countA97).toFixed(1)}x`
-                : `100% registrado como R50.9 (0 A97)`;
+            document.getElementById('kpiDengueSinSignos').innerText = `Sin alarma (A97.0): ${countA970.toLocaleString('es-PE')}`;
+            document.getElementById('kpiDengueConSignos').innerText = `Con alarma (A97.1): ${countA971.toLocaleString('es-PE')}`;
+            const ratioTxt = countA97 > 0 ? `Ratio R50.9/A97: ${(countR509 / countA97).toFixed(1)}x` : `Sin A97 registrados`;
+            document.getElementById('kpiDengueSubregistro').innerText = `Grave/No esp.: ${countA97Otros.toLocaleString('es-PE')} | ${ratioTxt}`;
             document.getElementById('kpiDengueSatelites').innerText = countSatelites.toLocaleString('es-PE');
             document.getElementById('kpiDengueCriticos').innerText = countCriticos.toLocaleString('es-PE');
             document.getElementById('kpiDengueCriticosPct').innerText = `${pctCrit}% de febriles`;
@@ -1572,7 +1602,7 @@
 
             // Daily curve (last N days sorted chronologically)
             const sortedDays = Object.values(dailyMap).sort((a, b) => a.date.localeCompare(b.date));
-            const recentDays = sortedDays.slice(-curveDays);
+            const recentDays = (curveDays > 0) ? sortedDays.slice(-curveDays) : sortedDays;
             lastDengueExportData = sortedDays;
 
             const sumRecent = recentDays.reduce((acc, d) => acc + d.total, 0);
@@ -1596,14 +1626,14 @@
                 return;
             }
             const wsData = [
-                ["FECHA ATENCIÓN", "DENGUE CODIFICADO (A97.x)", "FIEBRE NO ESPECIFICADA (R50.9)", "TOTAL VIGILANCIA FEBRIL"]
+                ["FECHA ATENCIÓN", "SIN SIGNOS ALARMA (A97.0)", "CON SIGNOS ALARMA (A97.1)", "GRAVE / NO ESP. (A97.2/A97.9)", "TOTAL DENGUE (A97)", "FIEBRE NO ESPECIFICADA (R50.9)", "TOTAL VIGILANCIA FEBRIL"]
             ];
             lastDengueExportData.forEach(d => {
-                wsData.push([d.date, d.a97, d.r509, d.total]);
+                wsData.push([d.date, d.a970 || 0, d.a971 || 0, d.a97otros || 0, d.a97, d.r509, d.total]);
             });
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.aoa_to_sheet(wsData);
-            ws['!cols'] = [{ wch: 18 }, { wch: 26 }, { wch: 30 }, { wch: 24 }];
+            ws['!cols'] = [{ wch: 18 }, { wch: 25 }, { wch: 25 }, { wch: 26 }, { wch: 20 }, { wch: 28 }, { wch: 24 }];
             XLSX.utils.book_append_sheet(wb, ws, "Curva_Diaria_Febriles");
             XLSX.writeFile(wb, "Sala_Situacional_Dengue_Febriles_Albrecht.xlsx");
         }
@@ -1838,7 +1868,7 @@
             chartTurnos = new Chart(ctxTurnos, {
                 type: 'bar',
                 data: {
-                    labels: ['Mañana (07-14h)', 'Tarde (14-20h)', 'Noche (20-07h)'],
+                    labels: ['Mañana (08-14h)', 'Tarde (14-20h)', 'Guardia Noche (20-08h)'],
                     datasets: [{
                         label: 'Atenciones',
                         data: [0, 0, 0],
@@ -1887,7 +1917,12 @@
                     plugins: {
                         legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
                         datalabels: {
-                            display: (ctx) => ctx.dataset.data[ctx.dataIndex] > 0 && ctx.datasetIndex === 1,
+                            display: (ctx) => {
+                                if (ctx.datasetIndex !== 1) return false;
+                                const a97 = ctx.chart.data.datasets[0].data[ctx.dataIndex] || 0;
+                                const r509 = ctx.chart.data.datasets[1].data[ctx.dataIndex] || 0;
+                                return (a97 + r509) > 0;
+                            },
                             anchor: 'end',
                             align: 'top',
                             offset: 2,
@@ -2023,7 +2058,24 @@
             if (typeof valDate === 'number') return new Date(Math.round((valDate - 25569) * 86400 * 1000));
 
             let dateStr = String(valDate).trim();
-            if (valTime) dateStr += ' ' + String(valTime).trim();
+            let timeStr = valTime ? String(valTime).trim() : '';
+
+            // Normalize Spanish a.m./p.m. into 24h HH:MM:SS if present
+            if (timeStr) {
+                const isPM = /p\.?\s*m\.?/i.test(timeStr);
+                const isAM = /a\.?\s*m\.?/i.test(timeStr);
+                const cleanT = timeStr.replace(/[ap]\.?\s*m\.?/ig, '').trim();
+                const tParts = cleanT.split(':');
+                if (tParts.length >= 2) {
+                    let hh = parseInt(tParts[0], 10);
+                    const mm = tParts[1].padStart(2, '0');
+                    const ss = (tParts[2] || '00').padStart(2, '0');
+                    if (isPM && hh < 12) hh += 12;
+                    if (isAM && hh === 12) hh = 0;
+                    timeStr = `${String(hh).padStart(2, '0')}:${mm}:${ss}`;
+                }
+                dateStr += ' ' + timeStr;
+            }
 
             if (dateStr.includes('/')) {
                 const parts = dateStr.split(' ');
@@ -2053,8 +2105,9 @@
                     const rows = lines.map(line => line.split(delim).map(c => c.trim()));
                     currentData = [];
                     rawRecordsData = [];
-                    globalSeenActos.clear();
-                    const n = parseExcelToSummary(rows);
+                    globalMapaActos.clear();
+                    collectRowsIntoActoMap(rows, 'LOCAL');
+                    const n = finalizeActoMapToDashboard();
                     populateFilters();
                     updateDashboard();
                     alert(`Archivo de prueba cargado: ${n.toLocaleString('es-PE')} atenciones.`);
@@ -2063,7 +2116,7 @@
             reader.readAsText(file, 'latin1');
         }
 
-        function parseExcelToSummary(rows) {
+        function collectRowsIntoActoMap(rows, fileTag = 'F') {
             const headerRow = rows[0].map(c => String(c).toUpperCase());
 
             let idxEst = headerRow.findIndex(h => h === 'DESC_ADSCRIPCION');
@@ -2083,15 +2136,25 @@
             let idxRegAdm = headerRow.findIndex(h => h === 'FECHOREGADM');
             let idxResult = headerRow.findIndex(h => h === 'RESULT_ATENCION');
 
-            if (idxEst === -1 || idxTopico === -1) return 0;
+            if (idxEst === -1 || idxTopico === -1) return;
 
-            const mapaActos = new Map();
+            const prioDiag = (lbl) => {
+                const up = String(lbl || '').toUpperCase();
+                const c = up.split('-')[0].trim().replace('.', '');
+                if (c === 'A972' || up.includes('DENGUE GRAVE')) return 6;
+                if (c === 'A971' || up.includes('CON SIGNOS DE ALARMA')) return 5;
+                if (c.startsWith('A97')) return 4; // A97.0 / A97.9
+                if (c.startsWith('R50')) return 3; // Fiebre prevalece sobre inespecíficos
+                if (c.startsWith('R53') || c.startsWith('R51') || c.startsWith('R104')) return 2;
+                if (c && c !== 'NO REGISTRADO') return 1;
+                return 0;
+            };
 
             for (let i = 1; i < rows.length; i++) {
                 const r = rows[i];
                 if (!r || !r[idxEst]) continue;
 
-                const actoMed = idxActoMed !== -1 && r[idxActoMed] ? String(r[idxActoMed]).trim() : `FILA_${i}`;
+                const actoMed = idxActoMed !== -1 && r[idxActoMed] ? String(r[idxActoMed]).trim() : `${fileTag}_FILA_${i}`;
                 const resultAtencion = idxResult !== -1 && r[idxResult] ? String(r[idxResult]).trim().toUpperCase() : '';
                 if (resultAtencion.includes('RETIRO VOLUNTARIO') || resultAtencion === '') continue;
 
@@ -2185,34 +2248,29 @@
                     esObservacion: topic.includes('OBSERVACION')
                 };
 
-                if (!mapaActos.has(actoMed)) {
-                    mapaActos.set(actoMed, itemActual);
+                if (!globalMapaActos.has(actoMed)) {
+                    globalMapaActos.set(actoMed, itemActual);
                 } else {
-                    const existente = mapaActos.get(actoMed);
-                    if (existente.esObservacion && !itemActual.esObservacion) {
-                        mapaActos.set(actoMed, itemActual);
+                    const existente = globalMapaActos.get(actoMed);
+                    const pExist = prioDiag(existente.diagLabel);
+                    const pCurr = prioDiag(itemActual.diagLabel);
+                    if (pCurr > pExist) {
+                        globalMapaActos.set(actoMed, itemActual);
+                    } else if (pCurr === pExist && existente.esObservacion && !itemActual.esObservacion) {
+                        globalMapaActos.set(actoMed, itemActual);
                     }
                 }
             }
+        }
 
-            const listaUnica = [];
-            for (const [acto, item] of mapaActos.entries()) {
-                if (!globalSeenActos.has(acto)) {
-                    globalSeenActos.add(acto);
-                    listaUnica.push(item);
-                }
-            }
-
+        function finalizeActoMapToDashboard() {
+            const listaUnica = Array.from(globalMapaActos.values());
             listaUnica.sort((a, b) => a.timeKey - b.timeKey);
-            listaUnica.forEach(item => rawRecordsData.push(item));
+            rawRecordsData = listaUnica;
 
             const summaryMap = {};
-            currentData.forEach(item => {
-                const key = `${item.est}___${item.topic}___${item.doctor}`;
-                summaryMap[key] = item;
-            });
-
             let totalNuevos = 0;
+
             listaUnica.forEach(item => {
                 const key = `${item.est}___${item.topic}___${item.doctor}`;
                 if (!summaryMap[key]) {
